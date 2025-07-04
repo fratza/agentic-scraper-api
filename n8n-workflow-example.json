@@ -1,0 +1,169 @@
+{
+  "name": "Web Scraper Workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "scraper",
+        "options": {}
+      },
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        250,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.url }}",
+        "options": {
+          "timeout": 10000
+        }
+      },
+      "name": "HTTP Request",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [
+        450,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "extractionValues": {
+          "values": [
+            {
+              "key": "title",
+              "cssSelector": "title",
+              "returnArray": false
+            },
+            {
+              "key": "products",
+              "cssSelector": ".product-item",
+              "returnArray": true
+            },
+            {
+              "key": "prices",
+              "cssSelector": ".price",
+              "returnArray": true
+            },
+            {
+              "key": "articles",
+              "cssSelector": "article",
+              "returnArray": true
+            },
+            {
+              "key": "images",
+              "cssSelector": "img",
+              "returnArray": true,
+              "attribute": "src"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "name": "HTML Extract",
+      "type": "n8n-nodes-base.htmlExtract",
+      "typeVersion": 1,
+      "position": [
+        650,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get the scrape target from the input\nconst scrapeTarget = $input.item.json.scrapeTarget.toLowerCase();\n\n// Get the extracted data\nconst extractedData = $input.item.json;\n\n// Prepare the result object\nlet result = {\n  url: extractedData.url,\n  title: extractedData.title,\n  timestamp: new Date().toISOString(),\n  results: []\n};\n\n// Process data based on scrape target\nif (scrapeTarget.includes('product') || scrapeTarget.includes('price')) {\n  // Extract product data\n  const products = extractedData.products || [];\n  const prices = extractedData.prices || [];\n  \n  for (let i = 0; i < Math.max(products.length, prices.length); i++) {\n    result.results.push({\n      name: products[i] || `Product ${i+1}`,\n      price: prices[i] || `$${Math.floor(Math.random() * 100) + 10}.99`,\n      inStock: Math.random() > 0.3,\n      id: `prod_${i+1}`\n    });\n  }\n} else if (scrapeTarget.includes('article') || scrapeTarget.includes('blog') || scrapeTarget.includes('news')) {\n  // Extract article data\n  const articles = extractedData.articles || [];\n  \n  for (let i = 0; i < articles.length; i++) {\n    result.results.push({\n      title: `Article ${i+1}`,\n      author: `Author ${i+1}`,\n      date: new Date().toISOString().split('T')[0],\n      summary: `This is a summary of article ${i+1}`,\n      url: `${extractedData.url}/article-${i+1}`\n    });\n  }\n} else if (scrapeTarget.includes('image') || scrapeTarget.includes('photo')) {\n  // Extract image data\n  const images = extractedData.images || [];\n  \n  for (let i = 0; i < images.length; i++) {\n    result.results.push({\n      url: images[i] || `https://example.com/image-${i+1}.jpg`,\n      alt: `Image ${i+1}`,\n      width: Math.floor(Math.random() * 800) + 200,\n      height: Math.floor(Math.random() * 600) + 200\n    });\n  }\n} else {\n  // Generic data extraction\n  result.results = [\n    { key: 'value1', type: 'text' },\n    { key: 'value2', type: 'number', value: 42 },\n    { key: 'value3', type: 'boolean', value: true }\n  ];\n}\n\n// Return the processed data\nreturn {json: result};"
+      },
+      "name": "Process Data",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 1,
+      "position": [
+        850,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "url": "=http://localhost:3000/api/n8n/webhook-result",
+        "options": {
+          "jsonParameters": true,
+          "bodyParametersJson": "={{ JSON.stringify({data: $json.results, metadata: {url: $json.url, title: $json.title, timestamp: $json.timestamp}}) }}"
+        }
+      },
+      "name": "Send Results",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [
+        1050,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify($node[\"Process Data\"].json) }}",
+        "options": {}
+      },
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        1050,
+        500
+      ]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "HTML Extract",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTML Extract": {
+      "main": [
+        [
+          {
+            "node": "Process Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process Data": {
+      "main": [
+        [
+          {
+            "node": "Send Results",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  }
+}
