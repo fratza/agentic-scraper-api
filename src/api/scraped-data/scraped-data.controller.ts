@@ -3,7 +3,7 @@ import scrapedDataService from "./scraped-data.service";
 
 /**
  * ScrapedDataController
- * Handles scraped data operations
+ * Handles scraped data operations and SSE events
  */
 export class ScrapedDataController {
   /**
@@ -80,6 +80,32 @@ export class ScrapedDataController {
       return res.status(500).json({
         status: "error",
         message: "Failed to retrieve scraped data",
+        error: error.message,
+      });
+    }
+  }
+  
+  /**
+   * Subscribe to SSE events for real-time scraped data
+   */
+  async subscribeToEvents(req: Request, res: Response) {
+    try {
+      // Set up SSE connection
+      scrapedDataService.addClient(res, req);
+
+      console.log(
+        `New client connected to scraped-data events. Total connected clients: ${scrapedDataService.getClientCount()}`
+      );
+
+      // The connection will remain open until the client disconnects
+      req.on("close", () => {
+        // Client disconnection is handled in the service
+      });
+    } catch (error: any) {
+      console.error("Error setting up SSE connection:", error.message);
+      return res.status(500).json({
+        status: "error",
+        message: "Failed to set up SSE connection",
         error: error.message,
       });
     }

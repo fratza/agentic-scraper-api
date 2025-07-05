@@ -18,6 +18,13 @@ router.post("/", scrapedDataController.receiveScrapedData);
 router.get("/", scrapedDataController.getAllScrapedData);
 
 /**
+ * @route   GET /api/scraped-data/events
+ * @desc    Subscribe to SSE events for real-time scraped data
+ * @access  Public
+ */
+router.get("/events", scrapedDataController.subscribeToEvents);
+
+/**
  * @route   GET /api/scraped-data/:id
  * @desc    Get scraped data by ID
  * @access  Public
