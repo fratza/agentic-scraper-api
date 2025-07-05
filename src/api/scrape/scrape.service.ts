@@ -1,66 +1,80 @@
-import axios from 'axios';
-import { ScrapeRequest, JobStatus } from './scrape.schema';
-import { config } from '../../config';
+import axios from "axios";
+import { ScrapeRequest, JobStatus } from "./scrape.schema";
+import { config } from "../../config";
 
 export class ScrapeService {
   async processScrapeRequest(scrapeData: ScrapeRequest) {
     try {
       // Check if n8n is enabled and webhook URL is available
       if (!config.n8n.enabled || !config.n8n.webhookUrl) {
-        console.log('n8n webhook URL not available, returning mock response');
+        console.log("n8n webhook URL not available, returning mock response");
         return {
           received: true,
           timestamp: new Date().toISOString(),
           mockData: true,
           url: scrapeData.url,
-          scrapeTarget: scrapeData.scrapeTarget
+          scrapeTarget: scrapeData.scrapeTarget,
         };
       }
 
       // Forward to n8n webhook
-      const n8nResponse = await axios.post(config.n8n.webhookUrl, {
-        url: scrapeData.url,
-        scrapeTarget: scrapeData.scrapeTarget,
-        timestamp: new Date().toISOString()
-      });
+      console.log(`Sending request to n8n webhook: ${config.n8n.webhookUrl}`);
       
+      // Format payload to match what n8n expects (same as startScrape method)
+      const payload = {
+        "URL": scrapeData.url,
+        "What do you want to scrape?": scrapeData.scrapeTarget,
+        "timestamp": new Date().toISOString()
+      };
+      
+      console.log(`Payload:`, payload);
+
+      const n8nResponse = await axios.post(config.n8n.webhookUrl, payload);
+
+      console.log(`n8n response status: ${n8nResponse.status}`);
+      console.log(`n8n response data:`, n8nResponse.data);
+
       return n8nResponse.data;
     } catch (error: any) {
-      console.error('Error in processScrapeRequest:', error.message);
+      console.error("Error in processScrapeRequest:", error.message);
       // Return a mock response instead of throwing the error
       return {
         received: false,
         error: error.message,
         timestamp: new Date().toISOString(),
-        mockData: true
+        mockData: true,
       };
     }
   }
-  
+
   async getJobStatus(jobId: string): Promise<JobStatus> {
     // Check if n8n is enabled
     if (!config.n8n.enabled) {
-      console.log('n8n is not enabled, returning mock job status');
+      console.log("n8n is not enabled, returning mock job status");
       return {
         jobId,
-        status: jobId.startsWith('mock-job') ? 'completed' : 'not_found',
-        progress: jobId.startsWith('mock-job') ? '100%' : '0%',
-        completedAt: jobId.startsWith('mock-job') ? new Date().toISOString() : undefined,
-        result: jobId.startsWith('mock-job') ? {
-          url: 'https://example.com',
-          content: 'This is mock content for the requested URL',
-          timestamp: new Date().toISOString()
-        } : undefined
+        status: jobId.startsWith("mock-job") ? "completed" : "not_found",
+        progress: jobId.startsWith("mock-job") ? "100%" : "0%",
+        completedAt: jobId.startsWith("mock-job")
+          ? new Date().toISOString()
+          : undefined,
+        result: jobId.startsWith("mock-job")
+          ? {
+              url: "https://example.com",
+              content: "This is mock content for the requested URL",
+              timestamp: new Date().toISOString(),
+            }
+          : undefined,
       };
     }
-    
+
     // In a real implementation, you would check the status in a database or n8n API
     // For now, we'll simulate a response
     return {
       jobId,
-      status: 'completed',
-      progress: '100%',
-      completedAt: new Date().toISOString()
+      status: "completed",
+      progress: "100%",
+      completedAt: new Date().toISOString(),
     };
   }
 }
