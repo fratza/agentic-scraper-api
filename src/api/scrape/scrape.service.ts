@@ -6,7 +6,7 @@ export class ScrapeService {
   async processScrapeRequest(scrapeData: ScrapeRequest) {
     try {
       // Check if n8n is enabled and webhook URL is available
-      if (!config.n8n.enabled || !config.n8n.webhookUrl) {
+      if (!config.n8n.enabled || !config.n8n.scrapeWebhookUrl) {
         console.log("n8n webhook URL not available, returning mock response");
         return {
           received: true,
@@ -18,7 +18,7 @@ export class ScrapeService {
       }
 
       // Forward to n8n webhook
-      console.log(`Sending request to n8n webhook: ${config.n8n.webhookUrl}`);
+      console.log(`Sending request to n8n webhook: ${config.n8n.scrapeWebhookUrl}`);
       
       // Format payload to match what n8n expects (same as startScrape method)
       const payload = {
@@ -29,7 +29,7 @@ export class ScrapeService {
       
       console.log(`Payload:`, payload);
 
-      const n8nResponse = await axios.post(config.n8n.webhookUrl, payload);
+      const n8nResponse = await axios.post(config.n8n.scrapeWebhookUrl!, payload);
 
       console.log(`n8n response status: ${n8nResponse.status}`);
       console.log(`n8n response data:`, n8nResponse.data);
