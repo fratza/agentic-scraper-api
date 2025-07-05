@@ -6,11 +6,12 @@ import { routes } from "./routes/";
 // Initialize express app
 const app = express();
 
-// CORS configuration - allow all origins
+// CORS configuration - allow all origins with SSE support
 const corsOptions = {
   origin: "*",
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
+  exposedHeaders: ["Content-Type"],
   credentials: true,
 };
 
