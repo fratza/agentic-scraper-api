@@ -30,9 +30,19 @@ export class ScrapeService {
       console.log(`Payload:`, payload);
 
       try {
-        const n8nResponse = await axios.post(config.n8n.webhookUrl!, payload, {
+        // Log the full request details for debugging
+        console.log("===== DEBUG REQUEST DETAILS =====");
+        console.log(`URL: ${config.n8n.webhookUrl}`);
+        console.log("Headers:", { "Content-Type": "application/json" });
+        console.log("Payload:", JSON.stringify(payload, null, 2));
+        console.log("================================");
+
+        // Try with different content type to match what might be working in Postman
+        const n8nResponse = await axios.post(config.n8n.webhookUrl, payload, {
           headers: {
             "Content-Type": "application/json",
+            // Add any other headers that might be needed
+            Accept: "application/json",
           },
         });
 
