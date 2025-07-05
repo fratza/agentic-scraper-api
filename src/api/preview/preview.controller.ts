@@ -1,4 +1,5 @@
 import { Request, Response } from "express";
+import previewService from "./preview.service";
 
 /**
  * PreviewController
@@ -7,7 +8,6 @@ import { Request, Response } from "express";
 export class PreviewController {
   /**
    * Receive and process sample data from n8n
-   * No storage - just passes the data back to the client
    */
   async previewSampleData(req: Request, res: Response) {
     try {
@@ -15,12 +15,14 @@ export class PreviewController {
       console.log("Received preview sample data:");
       console.log(JSON.stringify(req.body, null, 2));
 
-      // Return the data directly without storing
+      // Send data to all connected SSE clients
+      previewService.sendToAllClients(req.body);
+
       return res.status(200).json({
         status: "success",
         message: "Sample data received successfully",
         data: req.body,
-        timestamp: new Date().toISOString(),
+        sseClients: previewService.getClientCount(),
       });
     } catch (error: any) {
       console.error("Error processing preview sample data:", error.message);
@@ -33,14 +35,29 @@ export class PreviewController {
   }
 
   /**
-   * Get the latest preview data for the frontend
-   * This endpoint is no longer needed as we don't store data anymore
+   * Subscribe to SSE events for real-time preview data
    */
-  async getPreviewData(req: Request, res: Response) {
-    return res.status(404).json({
-      status: "error",
-      message: "Preview data is not stored. Use the POST endpoint directly.",
-    });
+  async subscribeToEvents(req: Request, res: Response) {
+    try {
+      // Set up SSE connection
+      previewService.addClient(res);
+
+      console.log(
+        `New client connected. Total connected clients: ${previewService.getClientCount()}`
+      );
+
+      // The connection will remain open until the client disconnects
+      req.on("close", () => {
+        // Client disconnection is handled in the service
+      });
+    } catch (error: any) {
+      console.error("Error setting up SSE connection:", error.message);
+      return res.status(500).json({
+        status: "error",
+        message: "Failed to set up SSE connection",
+        error: error.message,
+      });
+    }
   }
 }
 
