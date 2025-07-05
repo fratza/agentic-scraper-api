@@ -1,21 +1,13 @@
 import { Request, Response } from "express";
 
-// Simple in-memory storage for the latest preview data
-interface PreviewData {
-  timestamp: string;
-  data: any;
-}
-
 /**
  * PreviewController
  * Handles preview sample data from n8n
  */
 export class PreviewController {
-  // Store the latest preview data in memory
-  private latestPreviewData: PreviewData | null = null;
-
   /**
    * Receive and process sample data from n8n
+   * No storage - just passes the data back to the client
    */
   async previewSampleData(req: Request, res: Response) {
     try {
@@ -23,16 +15,12 @@ export class PreviewController {
       console.log("Received preview sample data:");
       console.log(JSON.stringify(req.body, null, 2));
 
-      // Store the data in memory
-      this.latestPreviewData = {
-        timestamp: new Date().toISOString(),
-        data: req.body,
-      };
-
+      // Return the data directly without storing
       return res.status(200).json({
         status: "success",
         message: "Sample data received successfully",
         data: req.body,
+        timestamp: new Date().toISOString(),
       });
     } catch (error: any) {
       console.error("Error processing preview sample data:", error.message);
@@ -46,19 +34,12 @@ export class PreviewController {
 
   /**
    * Get the latest preview data for the frontend
+   * This endpoint is no longer needed as we don't store data anymore
    */
-  async getLatestPreviewData(req: Request, res: Response) {
-    if (!this.latestPreviewData) {
-      return res.status(404).json({
-        status: "error",
-        message: "No preview data available yet",
-      });
-    }
-
-    return res.status(200).json({
-      status: "success",
-      message: "Preview data retrieved successfully",
-      ...this.latestPreviewData,
+  async getPreviewData(req: Request, res: Response) {
+    return res.status(404).json({
+      status: "error",
+      message: "Preview data is not stored. Use the POST endpoint directly.",
     });
   }
 }

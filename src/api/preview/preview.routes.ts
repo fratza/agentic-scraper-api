@@ -5,16 +5,16 @@ const router = express.Router();
 
 /**
  * @route   POST /api/preview/sample_data
- * @desc    Receive sample data from n8n for preview
+ * @desc    Receive sample data from n8n for preview and return it directly (no storage)
  * @access  Public (but can be secured with API key)
  */
 router.post("/sample_data", previewController.previewSampleData);
 
 /**
  * @route   GET /api/preview/sample_data
- * @desc    Get the latest preview sample data for frontend
+ * @desc    [DEPRECATED] - Preview data is no longer stored
  * @access  Public
  */
-router.get("/sample_data", previewController.getLatestPreviewData);
+router.get("/sample_data", previewController.getPreviewData);
 
 export default router;
