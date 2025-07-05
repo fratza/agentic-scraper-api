@@ -6,8 +6,16 @@ import { routes } from "./routes/";
 // Initialize express app
 const app = express();
 
+// CORS configuration - allow all origins
+const corsOptions = {
+  origin: "*",
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+  credentials: true,
+};
+
 // Middleware
-app.use(cors());
+app.use(cors(corsOptions));
 app.use(express.json());
 app.use(morgan("dev")); // Logging
 
@@ -22,6 +30,7 @@ app.get("/", (req: Request, res: Response) => {
     endpoints: {
       scrape: "/api/scrape",
       n8n: "/api/n8n",
+      preview: "/api/preview",
     },
   });
 });
