@@ -1,13 +1,14 @@
-import dotenv from 'dotenv';
-import path from 'path';
+import dotenv from "dotenv";
+import path from "path";
 
 // Load environment variables
-dotenv.config({ path: path.resolve(__dirname, '../../.env') });
+dotenv.config({ path: path.resolve(__dirname, "../../.env") });
 
 // Helper to check if n8n is enabled
 const isN8nEnabled = () => {
-  return process.env.N8N_WEBHOOK_URL && 
-         !process.env.N8N_WEBHOOK_URL.startsWith('#');
+  return (
+    process.env.N8N_WEBHOOK_URL && !process.env.N8N_WEBHOOK_URL.startsWith("#")
+  );
 };
 
 export const config = {
@@ -20,7 +21,7 @@ export const config = {
   },
   security: {
     apiKey: process.env.API_KEY,
-  }
+  },
 };
 
 export default config;

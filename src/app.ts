@@ -34,6 +34,7 @@ app.get("/", (req: Request, res: Response) => {
       scrape: "/api/scrape",
       n8n: "/api/n8n",
       preview: "/api/preview",
+      scrapedData: "/api/scraped-data",
     },
   });
 });
