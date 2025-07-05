@@ -1,0 +1,20 @@
+services:
+  - type: web
+    name: agentic-scraper-api
+    env: node
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    envVars:
+      - key: PORT
+        value: 10000
+      - key: N8N_WEBHOOK_URL
+        sync: false
+      - key: N8N_SCRAPE_WEBHOOK_URL
+        sync: false
+      - key: N8N_API_URL
+        sync: false
+      - key: N8N_API_KEY
+        sync: false
+      - key: API_KEY
+        sync: false
+    plan: free
