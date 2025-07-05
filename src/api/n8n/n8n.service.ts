@@ -11,19 +11,8 @@ export class N8nService {
   
   async getWorkflows() {
     try {
-      // Check if n8n API URL and key are configured
-      if (!config.n8n.apiUrl || !config.n8n.apiKey) {
-        throw new Error('n8n API configuration missing');
-      }
-      
-      // Make request to n8n API to get workflows
-      const response = await axios.get(`${config.n8n.apiUrl}/workflows`, {
-        headers: {
-          'X-N8N-API-KEY': config.n8n.apiKey
-        }
-      });
-      
-      return response.data;
+      // Since we're only using N8N_WEBHOOK_URL now, this method is not supported
+      throw new Error('n8n API access is not configured - only webhook functionality is available');
     } catch (error) {
       throw error;
     }
@@ -31,19 +20,8 @@ export class N8nService {
   
   async executeWorkflow(workflowId: string, data: WorkflowExecutionData) {
     try {
-      // Check if n8n API URL and key are configured
-      if (!config.n8n.apiUrl || !config.n8n.apiKey) {
-        throw new Error('n8n API configuration missing');
-      }
-      
-      // Execute workflow in n8n
-      const response = await axios.post(`${config.n8n.apiUrl}/workflows/${workflowId}/execute`, data, {
-        headers: {
-          'X-N8N-API-KEY': config.n8n.apiKey
-        }
-      });
-      
-      return response.data;
+      // Since we're only using N8N_WEBHOOK_URL now, this method is not supported
+      throw new Error('n8n API access is not configured - only webhook functionality is available');
     } catch (error) {
       throw error;
     }
