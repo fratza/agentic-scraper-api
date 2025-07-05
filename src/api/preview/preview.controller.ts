@@ -40,7 +40,7 @@ export class PreviewController {
   async subscribeToEvents(req: Request, res: Response) {
     try {
       // Set up SSE connection
-      previewService.addClient(res);
+      previewService.addClient(res, req);
 
       console.log(
         `New client connected. Total connected clients: ${previewService.getClientCount()}`

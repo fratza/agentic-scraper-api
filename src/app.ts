@@ -13,6 +13,8 @@ const corsOptions = {
   allowedHeaders: ["Content-Type", "Authorization"],
   exposedHeaders: ["Content-Type"],
   credentials: true,
+  preflightContinue: false,
+  optionsSuccessStatus: 204
 };
 
 // Middleware

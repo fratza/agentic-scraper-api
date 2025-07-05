@@ -1,4 +1,4 @@
-import { Response } from "express";
+import { Request, Response } from "express";
 
 /**
  * Service to manage SSE connections for preview data
@@ -9,15 +9,22 @@ export class PreviewService {
   /**
    * Add a new client connection
    * @param client Express response object
+   * @param req Express request object (optional)
    */
-  addClient(client: Response): void {
-    // Set headers for SSE
-    client.writeHead(200, {
+  addClient(client: Response, req?: Request): void {
+    // Set headers for SSE with CORS support
+    // Set headers for SSE with CORS support for all origins
+    const corsHeaders: Record<string, string> = {
       "Content-Type": "text/event-stream",
       "Cache-Control": "no-cache, no-transform",
       Connection: "keep-alive",
       "X-Accel-Buffering": "no", // Disable proxy buffering
-    });
+      "Access-Control-Allow-Origin": "*", // Allow all origins
+      "Access-Control-Allow-Methods": "GET, OPTIONS",
+      "Access-Control-Allow-Headers": "Content-Type, Authorization"
+    };
+  
+    client.writeHead(200, corsHeaders);
 
     // Send initial connection message
     const connectEvent = JSON.stringify({
