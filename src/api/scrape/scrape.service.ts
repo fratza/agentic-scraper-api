@@ -19,27 +19,21 @@ export class ScrapeService {
 
       // Forward to n8n webhook
       console.log(`Sending request to n8n webhook: ${config.n8n.webhookUrl}`);
-      
+
       // Format payload to match what n8n expects (same as startScrape method)
       const payload = {
-        "URL": scrapeData.url,
+        URL: scrapeData.url,
         "What do you want to scrape?": scrapeData.scrapeTarget,
-        "timestamp": new Date().toISOString()
+        timestamp: new Date().toISOString(),
       };
-      
+
       console.log(`Payload:`, payload);
 
-      // Check if the webhook URL is the problematic one from the error message
-      if (config.n8n.webhookUrl === "https://fratztechno.app.n8n.cloud/webhook/getvalue") {
-        console.error(`The webhook URL (${config.n8n.webhookUrl}) is returning 404 errors. Please update your .env file with the correct URL.`);
-        throw new Error(`The webhook URL is incorrect. The URL 'https://fratztechno.app.n8n.cloud/webhook/getvalue' is returning 404 errors. Please update your .env configuration with the correct webhook URL.`);
-      }
-      
       try {
         const n8nResponse = await axios.post(config.n8n.webhookUrl!, payload, {
           headers: {
-            'Content-Type': 'application/json'
-          }
+            "Content-Type": "application/json",
+          },
         });
 
         console.log(`n8n response status: ${n8nResponse.status}`);
@@ -51,21 +45,32 @@ export class ScrapeService {
         if (axiosError.response) {
           // The request was made and the server responded with a status code
           // that falls out of the range of 2xx
-          console.error(`n8n webhook error: ${axiosError.response.status} - ${axiosError.response.statusText}`);
-          
+          console.error(
+            `n8n webhook error: ${axiosError.response.status} - ${axiosError.response.statusText}`
+          );
+
           if (axiosError.response.status === 404) {
-            console.error(`The webhook URL (${config.n8n.webhookUrl}) was not found. Please verify the URL is correct.`);
-            throw new Error(`Webhook URL not found (404). Please verify the URL: ${config.n8n.webhookUrl}. You may need to update your .env file with the correct webhook URL.`);
+            console.error(
+              `The webhook URL (${config.n8n.webhookUrl}) was not found. Please verify the URL is correct.`
+            );
+            throw new Error(
+              `Webhook URL not found (404). Please verify the URL: ${config.n8n.webhookUrl}. You may need to update your .env file with the correct webhook URL.`
+            );
           }
-          
+
           throw axiosError;
         } else if (axiosError.request) {
           // The request was made but no response was received
-          console.error('No response received from n8n webhook');
-          throw new Error('No response received from n8n webhook. Please check your network connection and webhook URL.');
+          console.error("No response received from n8n webhook");
+          throw new Error(
+            "No response received from n8n webhook. Please check your network connection and webhook URL."
+          );
         } else {
           // Something happened in setting up the request that triggered an Error
-          console.error('Error setting up webhook request:', axiosError.message);
+          console.error(
+            "Error setting up webhook request:",
+            axiosError.message
+          );
           throw axiosError;
         }
       }
