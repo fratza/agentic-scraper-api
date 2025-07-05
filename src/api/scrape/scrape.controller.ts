@@ -32,7 +32,11 @@ export class ScrapeController {
       if (n8nEnabled && n8nWebhookUrl) {
         // Send to n8n webhook if properly configured
         try {
-          const response = await axios.post(n8nWebhookUrl, payload);
+          const response = await axios.post(n8nWebhookUrl, payload, {
+            headers: {
+              'Content-Type': 'application/json'
+            }
+          });
           
           // Return the data from n8n
           return res.status(200).json({
@@ -117,7 +121,7 @@ export class ScrapeController {
       });
       
     } catch (error: any) {
-      console.error('Error in scrape endpoint:', error);
+      console.error('Error in processScrapeRequest:', error);
       
       // Check if error is from n8n response
       if (error.response) {
@@ -125,6 +129,16 @@ export class ScrapeController {
           status: 'error',
           message: 'Error from n8n service',
           error: error.response.data
+        });
+      }
+      
+      // Handle 404 errors specifically
+      if (error.message && error.message.includes('404')) {
+        return res.status(404).json({
+          status: 'error',
+          message: 'Webhook URL not found',
+          error: error.message,
+          suggestion: 'Please verify the n8n webhook URL in your environment configuration'
         });
       }
       
