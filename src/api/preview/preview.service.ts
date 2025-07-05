@@ -75,7 +75,7 @@ export class PreviewService {
     this.clients.forEach((client) => {
       if (!client.writableEnded) {
         // Format properly with event type, id and data
-        client.write(`event: message\nid: ${eventId}\ndata: ${eventData}\n\n`);
+        client.write(`event: preview\nid: ${eventId}\ndata: ${eventData}\n\n`);
         clientCount++;
       } else {
         // Remove stale clients
