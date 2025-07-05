@@ -7,9 +7,7 @@ dotenv.config({ path: path.resolve(__dirname, '../../.env') });
 // Helper to check if n8n is enabled
 const isN8nEnabled = () => {
   return process.env.N8N_WEBHOOK_URL && 
-         !process.env.N8N_WEBHOOK_URL.startsWith('#') &&
-         process.env.N8N_SCRAPE_WEBHOOK_URL &&
-         !process.env.N8N_SCRAPE_WEBHOOK_URL.startsWith('#');
+         !process.env.N8N_WEBHOOK_URL.startsWith('#');
 };
 
 export const config = {
