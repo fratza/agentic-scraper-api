@@ -27,7 +27,7 @@ export class ScrapeController {
       
       // Check if n8n is enabled and webhook URL is configured
       const n8nEnabled = config.n8n.enabled;
-      const n8nWebhookUrl = config.n8n.scrapeWebhookUrl;
+      const n8nWebhookUrl = config.n8n.webhookUrl;
       
       if (n8nEnabled && n8nWebhookUrl) {
         // Send to n8n webhook if properly configured

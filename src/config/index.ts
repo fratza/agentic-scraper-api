@@ -17,9 +17,6 @@ export const config = {
   n8n: {
     enabled: isN8nEnabled(),
     webhookUrl: process.env.N8N_WEBHOOK_URL || null,
-    scrapeWebhookUrl: process.env.N8N_SCRAPE_WEBHOOK_URL || null,
-    apiUrl: process.env.N8N_API_URL || null,
-    apiKey: process.env.N8N_API_KEY || null,
   },
   security: {
     apiKey: process.env.API_KEY,
