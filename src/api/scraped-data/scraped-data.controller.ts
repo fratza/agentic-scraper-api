@@ -15,6 +15,28 @@ export class ScrapedDataController {
       console.log("Received scraped data:");
       console.log(JSON.stringify(req.body, null, 2));
 
+      // Extract run_id from request body or query parameters
+      const run_id =
+        req.body.run_id ||
+        req.body.runId ||
+        req.body.job_id ||
+        req.body.jobId ||
+        req.query.run_id ||
+        req.query.runId ||
+        req.query.job_id ||
+        req.query.jobId;
+
+      // If run_id is provided in the query but not in the body, add it to the body
+      if (
+        run_id &&
+        !req.body.run_id &&
+        !req.body.runId &&
+        !req.body.job_id &&
+        !req.body.jobId
+      ) {
+        req.body.run_id = run_id;
+      }
+
       // Store the data using the service
       const savedData = await scrapedDataService.saveScrapedData(req.body);
 
@@ -22,6 +44,10 @@ export class ScrapedDataController {
         status: "success",
         message: "Scraped data received successfully",
         data: savedData,
+        run_id: savedData.run_id,
+        sseClients: savedData.run_id
+          ? scrapedDataService.getClientCountForRunId(savedData.run_id)
+          : scrapedDataService.getClientCount(),
       });
     } catch (error: any) {
       console.error("Error processing scraped data:", error.message);
@@ -38,11 +64,32 @@ export class ScrapedDataController {
    */
   async getAllScrapedData(req: Request, res: Response) {
     try {
-      const data = await scrapedDataService.getAllScrapedData();
+      // Check if we should filter by run_id
+      const run_id =
+        req.query.run_id ||
+        req.query.runId ||
+        req.query.job_id ||
+        req.query.jobId;
+
+      let data = await scrapedDataService.getAllScrapedData();
+
+      // Filter by run_id if provided
+      if (run_id) {
+        data = data.filter(
+          (item) =>
+            item.run_id === run_id ||
+            item.data?.run_id === run_id ||
+            item.data?.runId === run_id ||
+            item.data?.job_id === run_id ||
+            item.data?.jobId === run_id
+        );
+      }
 
       return res.status(200).json({
         status: "success",
         message: "Scraped data retrieved successfully",
+        count: data.length,
+        run_id: run_id || undefined,
         data,
       });
     } catch (error: any) {
@@ -73,6 +120,7 @@ export class ScrapedDataController {
       return res.status(200).json({
         status: "success",
         message: "Scraped data retrieved successfully",
+        run_id: data.run_id,
         data,
       });
     } catch (error: any) {
@@ -84,12 +132,25 @@ export class ScrapedDataController {
       });
     }
   }
-  
+
   /**
    * Subscribe to SSE events for real-time scraped data
    */
   async subscribeToEvents(req: Request, res: Response) {
     try {
+      // Extract run_id from query parameters
+      const run_id =
+        req.query.run_id ||
+        req.query.runId ||
+        req.query.job_id ||
+        req.query.jobId;
+
+      if (run_id) {
+        console.log(`Client subscribing to events for run_id: ${run_id}`);
+      } else {
+        console.log("Client subscribing to all events");
+      }
+
       // Set up SSE connection
       scrapedDataService.addClient(res, req);
 
