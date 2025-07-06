@@ -172,7 +172,7 @@ export class ScrapedDataService {
       ) {
         // Format properly with event type, id and data
         response.write(
-          `event: scrapeData\nid: ${eventId}\ndata: ${eventData}\n\n`
+          `event: scrapedData\nid: ${eventId}\ndata: ${eventData}\n\n`
         );
         clientCount++;
       } else if (response.writableEnded) {
