@@ -39,6 +39,9 @@ export class ScrapedDataController {
 
       // Store the data using the service
       const savedData = await scrapedDataService.saveScrapedData(req.body);
+      
+      // Log that we're sending SSE event
+      console.log(`Triggering SSE event for scraped data with ID: ${savedData.id}`);
 
       return res.status(200).json({
         status: "success",

@@ -147,9 +147,13 @@ export class ScrapedDataService {
    * @param data Data to send
    */
   sendToAllClients(data: ScrapedDataItem): void {
+    // Format the data to be more directly usable by clients
     const eventData = JSON.stringify({
       timestamp: new Date().toISOString(),
-      data,
+      id: data.id,
+      run_id: data.run_id,
+      data: data.data, // Send the actual scraped data content
+      timestamp_received: data.timestamp
     });
 
     const eventId = Date.now().toString();
