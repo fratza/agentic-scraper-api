@@ -27,7 +27,7 @@ export class ScrapedDataService {
    */
   async saveScrapedData(data: any): Promise<ScrapedDataItem> {
     // Extract run_id from data if available
-    const run_id = data.run_id || data.runId || data.job_id || data.jobId;
+    const run_id = data.run_id || data.runId;
 
     const newItem: ScrapedDataItem = {
       id: this.generateId(),
@@ -77,9 +77,7 @@ export class ScrapedDataService {
     if (req && req.query) {
       // Support multiple parameter names for backward compatibility
       run_id = (req.query.run_id ||
-        req.query.runId ||
-        req.query.job_id ||
-        req.query.jobId) as string;
+        req.query.runId) as string;
     }
 
     // Set headers for SSE with CORS support for all origins

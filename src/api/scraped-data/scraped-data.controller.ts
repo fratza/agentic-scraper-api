@@ -19,20 +19,14 @@ export class ScrapedDataController {
       const run_id =
         req.body.run_id ||
         req.body.runId ||
-        req.body.job_id ||
-        req.body.jobId ||
         req.query.run_id ||
-        req.query.runId ||
-        req.query.job_id ||
-        req.query.jobId;
+        req.query.runId;
 
       // If run_id is provided in the query but not in the body, add it to the body
       if (
         run_id &&
         !req.body.run_id &&
-        !req.body.runId &&
-        !req.body.job_id &&
-        !req.body.jobId
+        !req.body.runId
       ) {
         req.body.run_id = run_id;
       }
@@ -70,9 +64,7 @@ export class ScrapedDataController {
       // Check if we should filter by run_id
       const run_id =
         req.query.run_id ||
-        req.query.runId ||
-        req.query.job_id ||
-        req.query.jobId;
+        req.query.runId;
 
       let data = await scrapedDataService.getAllScrapedData();
 
@@ -82,9 +74,7 @@ export class ScrapedDataController {
           (item) =>
             item.run_id === run_id ||
             item.data?.run_id === run_id ||
-            item.data?.runId === run_id ||
-            item.data?.job_id === run_id ||
-            item.data?.jobId === run_id
+            item.data?.runId === run_id
         );
       }
 
@@ -144,9 +134,7 @@ export class ScrapedDataController {
       // Extract run_id from query parameters
       const run_id =
         req.query.run_id ||
-        req.query.runId ||
-        req.query.job_id ||
-        req.query.jobId;
+        req.query.runId;
 
       if (run_id) {
         console.log(`Client subscribing to events for run_id: ${run_id}`);
