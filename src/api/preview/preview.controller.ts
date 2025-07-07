@@ -11,9 +11,7 @@ export class PreviewController {
    */
   async previewSampleData(req: Request, res: Response) {
     try {
-      // Log the received data
-      console.log("Received preview sample data:");
-      console.log(JSON.stringify(req.body, null, 2));
+      // Process the received data
 
       // Send data to all connected SSE clients
       previewService.sendToAllClients(req.body);
@@ -42,9 +40,7 @@ export class PreviewController {
       // Set up SSE connection
       previewService.addClient(res, req);
 
-      console.log(
-        `New client connected. Total connected clients: ${previewService.getClientCount()}`
-      );
+      // Client connected successfully
 
       // The connection will remain open until the client disconnects
       req.on("close", () => {

@@ -60,9 +60,7 @@ export class PreviewService {
    */
   removeClient(client: Response): void {
     this.clients = this.clients.filter((c) => c !== client);
-    console.log(
-      `Client disconnected. Total connected clients: ${this.clients.length}`
-    );
+    // Client disconnected
   }
 
   /**
@@ -74,7 +72,7 @@ export class PreviewService {
       timestamp: new Date().toISOString(),
       data,
     });
-    console.log("THIS IS DATA", eventData);
+    // Prepare event data for clients
 
     const eventId = Date.now().toString();
     let clientCount = 0;
@@ -90,9 +88,7 @@ export class PreviewService {
       }
     });
 
-    console.log(`Data sent to ${clientCount} clients`);
-    // Log the actual data being sent for debugging
-    console.log(`Event data: ${eventData}`);
+    // Data sent to clients
   }
 
   /**

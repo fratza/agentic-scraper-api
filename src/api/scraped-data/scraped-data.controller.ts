@@ -11,9 +11,7 @@ export class ScrapedDataController {
    */
   async receiveScrapedData(req: Request, res: Response) {
     try {
-      // Log the received data
-      console.log("Received scraped data:");
-      console.log(JSON.stringify(req.body, null, 2));
+      // Process the received data
 
       // Extract run_id from request body or query parameters
       const run_id =
@@ -34,8 +32,7 @@ export class ScrapedDataController {
       // Store the data using the service
       const savedData = await scrapedDataService.saveScrapedData(req.body);
       
-      // Log that we're sending SSE event
-      console.log(`Triggering SSE event for scraped data with ID: ${savedData.id}`);
+      // Trigger SSE event for the saved data
 
       return res.status(200).json({
         status: "success",
@@ -136,18 +133,12 @@ export class ScrapedDataController {
         req.query.run_id ||
         req.query.runId;
 
-      if (run_id) {
-        console.log(`Client subscribing to events for run_id: ${run_id}`);
-      } else {
-        console.log("Client subscribing to all events");
-      }
+      // Client subscribing to events with optional run_id filter
 
       // Set up SSE connection
       scrapedDataService.addClient(res, req);
 
-      console.log(
-        `New client connected to scraped-data events. Total connected clients: ${scrapedDataService.getClientCount()}`
-      );
+      // Client connected successfully
 
       // The connection will remain open until the client disconnects
       req.on("close", () => {

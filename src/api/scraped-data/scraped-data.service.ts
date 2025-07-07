@@ -116,11 +116,7 @@ export class ScrapedDataService {
     const client = { response, run_id };
     this.clients.push(client);
 
-    console.log(
-      `New client connected ${
-        run_id ? `for run_id: ${run_id}` : "(all events)"
-      }`
-    );
+    // Client connected with optional run_id filter
 
     // Handle client disconnect
     response.on("close", () => {
@@ -135,9 +131,7 @@ export class ScrapedDataService {
    */
   removeClient(client: SSEClient): void {
     this.clients = this.clients.filter((c) => c !== client);
-    console.log(
-      `Client disconnected. Total connected clients: ${this.clients.length}`
-    );
+    // Client disconnected
   }
 
   /**
@@ -179,13 +173,7 @@ export class ScrapedDataService {
       }
     });
 
-    console.log(
-      `Scraped data event sent to ${clientCount} clients ${
-        run_id ? `for run_id: ${run_id}` : ""
-      }`
-    );
-    // Log the actual data being sent for debugging
-    console.log(`Event data: ${eventData}`);
+    // Data sent to clients
   }
 
   /**
