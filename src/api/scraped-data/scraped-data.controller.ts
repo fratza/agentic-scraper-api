@@ -74,13 +74,28 @@ export class ScrapedDataController {
             item.data?.runId === run_id
         );
       }
+      
+      // Unwrap the data by removing the outer "data" and "id" wrapper
+      const unwrappedData = data.map(item => {
+        // Preserve the run_id at the top level if it exists
+        const run_id = item.run_id || item.data?.run_id || item.data?.runId;
+        
+        // If item.data exists and is an object, return it directly with run_id
+        if (item.data && typeof item.data === 'object') {
+          return { ...item.data, run_id };
+        }
+        
+        // Otherwise return the item without the id field
+        const { id, ...rest } = item;
+        return rest;
+      });
 
       return res.status(200).json({
         status: "success",
         message: "Scraped data retrieved successfully",
-        count: data.length,
+        count: unwrappedData.length,
         run_id: run_id || undefined,
-        data,
+        data: unwrappedData,
       });
     } catch (error: any) {
       console.error("Error retrieving scraped data:", error.message);
@@ -106,12 +121,27 @@ export class ScrapedDataController {
           message: "Scraped data not found",
         });
       }
+      
+      // Unwrap the data by removing the outer "data" and "id" wrapper
+      let unwrappedData;
+      
+      // Preserve the run_id at the top level if it exists
+      const run_id = data.run_id || data.data?.run_id || data.data?.runId;
+      
+      // If data.data exists and is an object, return it directly with run_id
+      if (data.data && typeof data.data === 'object') {
+        unwrappedData = { ...data.data, run_id };
+      } else {
+        // Otherwise return the data without the id field
+        const { id: itemId, ...rest } = data;
+        unwrappedData = rest;
+      }
 
       return res.status(200).json({
         status: "success",
         message: "Scraped data retrieved successfully",
-        run_id: data.run_id,
-        data,
+        run_id,
+        data: unwrappedData,
       });
     } catch (error: any) {
       console.error("Error retrieving scraped data:", error.message);
