@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import axios from "axios";
+import resumeUrlService from "../../services/resume-url.service";
 
 /**
  * ProceedScrapeController
@@ -11,41 +12,29 @@ export class ProceedScrapeController {
    */
   async proceedWithScrape(req: Request, res: Response) {
     try {
-      // Extract these at the top level so they're available in all catch blocks
-      const { action, resume_link } = req.body;
+      // Extract action from request body
+      const { action } = req.body;
+      
+      // Use resume_link from request or fall back to stored URL
+      const resume_link = req.body.resume_link || resumeUrlService.getResumeUrl();
 
-      if (!action || !resume_link) {
+      if (!action) {
         return res.status(400).json({
           status: "error",
-          message: "Missing required fields: action and resume_link are required",
+          message: "Missing required field: action is required",
+        });
+      }
+      
+      if (!resume_link) {
+        return res.status(400).json({
+          status: "error",
+          message: "No resume URL available. Please provide resume_link or ensure it was stored from a previous request.",
         });
       }
 
-      let response;
-      
-      // Check if the resource exists before posting (to avoid 409 Conflict)
-      try {
-        // First try to get the resource status
-        const checkResponse = await axios.get(resume_link);
-        
-        // If we get here, the resource exists, so we need to use PUT instead of POST
-        // or include a special header to indicate we're aware of the resource
-        response = await axios.post(resume_link, { 
-          action,
-          update: true // Signal that we're aware this might be an update operation
-        }, {
-          headers: {
-            'If-Match': checkResponse.headers.etag || '*', // Use ETag if available for concurrency control
-            'X-Update-Operation': 'true' // Custom header to indicate update operation
-          }
-        });
-      } catch (checkError) {
-        // If the GET request fails with 404, the resource doesn't exist yet, so proceed with normal POST
-        // Otherwise, something else is wrong, so just try the normal POST
-        
-        // Forward the action to the resume_link
-        response = await axios.post(resume_link, { action });
-      }
+      // 3. Make a simple POST request to the resume URL with action as body
+      console.log(`Making POST request to ${resume_link} with action: ${action}`);
+      const response = await axios.post(resume_link, { action });
 
       return res.status(200).json({
         status: "success",
@@ -62,26 +51,6 @@ export class ProceedScrapeController {
         
         console.log(`Response status: ${statusCode}`);
         console.log('Response data:', responseData);
-        
-        // Special handling for 409 Conflict - try a PUT request instead
-        if (statusCode === 409) {
-          try {
-            console.log('Received 409 Conflict, attempting PUT request instead...');
-            // Try a PUT request as a fallback
-            // We need to access req.body again since the original variables might be out of scope
-            const { action, resume_link: resumeLink } = req.body;
-            const putResponse = await axios.put(resumeLink, { action });
-            
-            return res.status(200).json({
-              status: "success",
-              message: "Scrape proceeding (via PUT fallback)",
-              data: putResponse.data,
-            });
-          } catch (putError: any) {
-            console.error("PUT fallback also failed:", putError.message);
-            // Continue to the error response below
-          }
-        }
         
         // Return the actual status code from the upstream service
         return res.status(statusCode).json({
