@@ -21,19 +21,17 @@ export class ScrapedDataController {
         req.body.run_id = run_id;
       }
 
-      console.log("****SCRAPED DATA****", req.body);
       // Store the data using the service
-      const savedData = await scrapedDataService.saveScrapedData(req.body);
+      await scrapedDataService.saveScrapedData(req.body);
 
-      // Trigger SSE event for the saved data
-
+      // Return a clean response without nested data
       return res.status(200).json({
         status: "success",
         message: "Scraped data received successfully",
-        data: savedData,
-        run_id: savedData.run_id,
-        sseClients: savedData.run_id
-          ? scrapedDataService.getClientCountForRunId(savedData.run_id)
+        data: req.body,
+        run_id: req.body.run_id,
+        sseClients: req.body.run_id
+          ? scrapedDataService.getClientCountForRunId(req.body.run_id)
           : scrapedDataService.getClientCount(),
       });
     } catch (error: any) {
