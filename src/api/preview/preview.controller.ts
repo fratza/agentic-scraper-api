@@ -39,6 +39,8 @@ export class PreviewController {
           const proceedUrl = `${req.protocol}://${req.get(
             "host"
           )}/api/proceed-scrape`;
+          
+          console.log("Calling proceed-scrape with:", { resume_link, action });
           proceedResponse = await axios.post(proceedUrl, {
             resume_link,
             action, // Only pass the action to be posted to resume_link
@@ -47,6 +49,24 @@ export class PreviewController {
           console.log("Proceeded with scrape:", proceedResponse.data);
         } catch (proceedError: any) {
           console.error("Error proceeding with scrape:", proceedError.message);
+          
+          // Log more details about the error
+          if (proceedError.response) {
+            console.error('Error response status:', proceedError.response.status);
+            console.error('Error response data:', proceedError.response.data);
+            
+            // Store the error response for the client
+            proceedResponse = {
+              data: {
+                status: "error",
+                message: proceedError.message,
+                details: proceedError.response.data
+              }
+            };
+          } else {
+            console.error('No response from proceed-scrape endpoint');
+          }
+          
           // Continue execution even if proceed-scrape fails
         }
       }
