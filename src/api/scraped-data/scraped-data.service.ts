@@ -27,7 +27,7 @@ export class ScrapedDataService {
    */
   async saveScrapedData(data: any): Promise<any> {
     const newItem: ScrapedDataItem = {
-      data: data.data,
+      data: data,
       timestamp: data.timestamp,
       runId: data.run_id,
       isMonitor: data.isMonitor,

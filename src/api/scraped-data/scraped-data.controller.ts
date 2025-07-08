@@ -21,6 +21,7 @@ export class ScrapedDataController {
         req.body.run_id = run_id;
       }
 
+      console.log("****SCRAPED DATA****", req.body);
       // Store the data using the service
       const savedData = await scrapedDataService.saveScrapedData(req.body);
 
