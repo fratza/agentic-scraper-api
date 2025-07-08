@@ -14,24 +14,16 @@ export class ScrapedDataController {
       // Process the received data
 
       // Extract run_id from request body or query parameters
-      const run_id =
-        req.body.run_id ||
-        req.body.runId ||
-        req.query.run_id ||
-        req.query.runId;
+      const run_id = req.body.run_id;
 
       // If run_id is provided in the query but not in the body, add it to the body
-      if (
-        run_id &&
-        !req.body.run_id &&
-        !req.body.runId
-      ) {
+      if (run_id && !req.body.run_id && !req.body.runId) {
         req.body.run_id = run_id;
       }
 
       // Store the data using the service
       const savedData = await scrapedDataService.saveScrapedData(req.body);
-      
+
       // Trigger SSE event for the saved data
 
       return res.status(200).json({
@@ -59,9 +51,7 @@ export class ScrapedDataController {
   async getAllScrapedData(req: Request, res: Response) {
     try {
       // Check if we should filter by run_id
-      const run_id =
-        req.query.run_id ||
-        req.query.runId;
+      const run_id = req.query.run_id || req.query.runId;
 
       let data = await scrapedDataService.getAllScrapedData();
 
@@ -74,17 +64,17 @@ export class ScrapedDataController {
             item.data?.runId === run_id
         );
       }
-      
+
       // Unwrap the data by removing the outer "data" and "id" wrapper
-      const unwrappedData = data.map(item => {
+      const unwrappedData = data.map((item) => {
         // Preserve the run_id at the top level if it exists
         const run_id = item.run_id || item.data?.run_id || item.data?.runId;
-        
+
         // If item.data exists and is an object, return it directly with run_id
-        if (item.data && typeof item.data === 'object') {
+        if (item.data && typeof item.data === "object") {
           return { ...item.data, run_id };
         }
-        
+
         // Otherwise return the item without the id field
         const { id, ...rest } = item;
         return rest;
@@ -121,15 +111,15 @@ export class ScrapedDataController {
           message: "Scraped data not found",
         });
       }
-      
+
       // Unwrap the data by removing the outer "data" and "id" wrapper
       let unwrappedData;
-      
+
       // Preserve the run_id at the top level if it exists
       const run_id = data.run_id || data.data?.run_id || data.data?.runId;
-      
+
       // If data.data exists and is an object, return it directly with run_id
-      if (data.data && typeof data.data === 'object') {
+      if (data.data && typeof data.data === "object") {
         unwrappedData = { ...data.data, run_id };
       } else {
         // Otherwise return the data without the id field
@@ -159,9 +149,7 @@ export class ScrapedDataController {
   async subscribeToEvents(req: Request, res: Response) {
     try {
       // Extract run_id from query parameters
-      const run_id =
-        req.query.run_id ||
-        req.query.runId;
+      const run_id = req.query.run_id || req.query.runId;
 
       // Client subscribing to events with optional run_id filter
 

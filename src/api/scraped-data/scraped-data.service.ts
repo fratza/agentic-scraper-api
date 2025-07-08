@@ -25,23 +25,26 @@ export class ScrapedDataService {
   /**
    * Save scraped data
    */
-  async saveScrapedData(data: any): Promise<ScrapedDataItem> {
-    // Extract run_id from data if available
+  async saveScrapedData(data: any): Promise<any> {
     const run_id = data.run_id || data.runId;
 
     const newItem: ScrapedDataItem = {
       id: this.generateId(),
       data,
-      timestamp: new Date(),
+      timestamp: data.timestamp,
       run_id,
     };
 
     this.scrapedDataStore.push(newItem);
 
-    // Send event to clients subscribed to this run_id
+    // Send event to SSE clients
     this.sendToAllClients(newItem);
 
-    return newItem;
+    return {
+      status: "success",
+      message: "Scraped data received successfully",
+      data: newItem.data,
+    };
   }
 
   /**
@@ -76,8 +79,7 @@ export class ScrapedDataService {
     let run_id: string | undefined;
     if (req && req.query) {
       // Support multiple parameter names for backward compatibility
-      run_id = (req.query.run_id ||
-        req.query.runId) as string;
+      run_id = (req.query.run_id || req.query.runId) as string;
     }
 
     // Set headers for SSE with CORS support for all origins
@@ -145,7 +147,7 @@ export class ScrapedDataService {
       id: data.id,
       run_id: data.run_id,
       data: data.data, // Send the actual scraped data content
-      timestamp_received: data.timestamp
+      timestamp_received: data.timestamp,
     });
 
     const eventId = Date.now().toString();
