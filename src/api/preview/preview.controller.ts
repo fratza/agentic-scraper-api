@@ -40,10 +40,13 @@ export class PreviewController {
             "host"
           )}/api/proceed-scrape`;
           
-          console.log("Calling proceed-scrape with:", { resume_link, action });
+          // Ensure action is always provided, default to 'process' if not specified
+          const actionToUse = action || 'process';
+          
+          console.log("Calling proceed-scrape with:", { resume_link, action: actionToUse });
           proceedResponse = await axios.post(proceedUrl, {
             resume_link,
-            action, // Only pass the action to be posted to resume_link
+            action: actionToUse, // Ensure action is always provided
           });
 
           console.log("Proceeded with scrape:", proceedResponse.data);

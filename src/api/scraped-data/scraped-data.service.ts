@@ -7,10 +7,10 @@ import { Request, Response } from "express";
 
 // In-memory storage for scraped data (replace with database in production)
 interface ScrapedDataItem {
-  id: string;
   data: any;
   timestamp: Date;
-  run_id?: string;
+  runId?: string;
+  isMonitor?: boolean;
 }
 
 interface SSEClient {
@@ -26,13 +26,11 @@ export class ScrapedDataService {
    * Save scraped data
    */
   async saveScrapedData(data: any): Promise<any> {
-    const run_id = data.run_id || data.runId;
-
     const newItem: ScrapedDataItem = {
-      id: this.generateId(),
-      data,
+      data: data.data,
       timestamp: data.timestamp,
-      run_id,
+      runId: data.run_id,
+      isMonitor: data.isMonitor,
     };
 
     this.scrapedDataStore.push(newItem);
@@ -55,10 +53,10 @@ export class ScrapedDataService {
   }
 
   /**
-   * Get scraped data by ID
+   * Get scraped data by runId
    */
   async getScrapedDataById(id: string): Promise<ScrapedDataItem | undefined> {
-    return this.scrapedDataStore.find((item) => item.id === id);
+    return this.scrapedDataStore.find((item) => item.runId === id);
   }
 
   /**
@@ -144,15 +142,14 @@ export class ScrapedDataService {
     // Format the data to be more directly usable by clients
     const eventData = JSON.stringify({
       timestamp: new Date().toISOString(),
-      id: data.id,
-      run_id: data.run_id,
+      run_id: data.runId,
       data: data.data, // Send the actual scraped data content
       timestamp_received: data.timestamp,
     });
 
     const eventId = Date.now().toString();
     let clientCount = 0;
-    const run_id = data.run_id;
+    const run_id = data.runId;
 
     this.clients.forEach((client) => {
       const response = client.response;

@@ -59,7 +59,7 @@ export class ScrapedDataController {
       if (run_id) {
         data = data.filter(
           (item) =>
-            item.run_id === run_id ||
+            item.runId === run_id ||
             item.data?.run_id === run_id ||
             item.data?.runId === run_id
         );
@@ -68,7 +68,7 @@ export class ScrapedDataController {
       // Unwrap the data by removing the outer "data" and "id" wrapper
       const unwrappedData = data.map((item) => {
         // Preserve the run_id at the top level if it exists
-        const run_id = item.run_id || item.data?.run_id || item.data?.runId;
+        const run_id = item.runId || item.data?.run_id || item.data?.runId;
 
         // If item.data exists and is an object, return it directly with run_id
         if (item.data && typeof item.data === "object") {
@@ -76,7 +76,7 @@ export class ScrapedDataController {
         }
 
         // Otherwise return the item without the id field
-        const { id, ...rest } = item;
+        const { runId, ...rest } = item;
         return rest;
       });
 
@@ -116,14 +116,14 @@ export class ScrapedDataController {
       let unwrappedData;
 
       // Preserve the run_id at the top level if it exists
-      const run_id = data.run_id || data.data?.run_id || data.data?.runId;
+      const run_id = data.runId;
 
       // If data.data exists and is an object, return it directly with run_id
       if (data.data && typeof data.data === "object") {
         unwrappedData = { ...data.data, run_id };
       } else {
         // Otherwise return the data without the id field
-        const { id: itemId, ...rest } = data;
+        const { runId: itemId, ...rest } = data;
         unwrappedData = rest;
       }
 

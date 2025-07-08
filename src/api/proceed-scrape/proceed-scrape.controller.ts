@@ -12,32 +12,38 @@ export class ProceedScrapeController {
    */
   async proceedWithScrape(req: Request, res: Response) {
     try {
-      // Extract action from request body
-      const { action } = req.body;
+      // Extract action from request body with fallback to 'process'
+      const action = req.body.action || 'process';
       
       // Use resume_link from request or fall back to stored URL
       const resume_link = req.body.resume_link || resumeUrlService.getResumeUrl();
-
-      if (!action) {
-        return res.status(400).json({
-          status: "error",
-          message: "Missing required field: action is required",
-        });
-      }
       
-      if (!resume_link) {
+      // Log the received request and resolved values
+      console.log('Proceed-scrape received request:', req.body);
+      console.log('Resolved values:', { action, resume_link, storedUrl: resumeUrlService.getResumeUrl() });
+      
+      // Check if we have a stored resume URL
+      const storedResumeUrl = resumeUrlService.getResumeUrl();
+      
+      if (!resume_link && !storedResumeUrl) {
         return res.status(400).json({
           status: "error",
           message: "No resume URL available. Please provide resume_link or ensure it was stored from a previous request.",
         });
       }
+      
+      // Use the stored URL if no resume_link was provided
+      const finalResumeUrl = resume_link || storedResumeUrl;
+      console.log(`Using resume URL: ${finalResumeUrl}`);
+      
+      // If we're here, we have both an action and a resume URL
 
       // 3. Make a simple POST request to the resume URL with action as body
-      console.log(`Making POST request to ${resume_link} with action:`, action);
+      console.log(`Making POST request to ${finalResumeUrl} with action:`, action);
       console.log('Request payload:', { action });
       
       try {
-        const response = await axios.post(resume_link, { action });
+        const response = await axios.post(finalResumeUrl, { action });
         console.log('Response received:', response.data);
         return res.status(200).json({
           status: "success",
