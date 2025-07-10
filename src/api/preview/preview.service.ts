@@ -68,9 +68,13 @@ export class PreviewService {
    * @param data Data to send
    */
   sendToAllClients(data: any): void {
+    // Extract content_type if available
+    const { content_type, ...otherData } = data;
+    
     const eventData = JSON.stringify({
       timestamp: new Date().toISOString(),
-      data,
+      data: otherData,
+      content_type: content_type || null, // Include content_type in the event data
     });
     // Prepare event data for clients
 
