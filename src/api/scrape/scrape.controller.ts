@@ -117,6 +117,7 @@ export class ScrapeController {
       const result = await scrapeService.processScrapeRequest({
         url,
         scrapeTarget,
+        contentType,
       });
 
       // Return the data

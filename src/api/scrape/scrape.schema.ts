@@ -1,6 +1,6 @@
 export interface ScrapeRequest {
   url: string;
-  scrapeTarget: string;
+  scrapeTarget?: string;
   contentType: string;
 }
 
