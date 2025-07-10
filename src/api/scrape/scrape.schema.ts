@@ -1,6 +1,7 @@
 export interface ScrapeRequest {
   url: string;
   scrapeTarget: string;
+  contentType: string;
 }
 
 export interface JobStatus {
