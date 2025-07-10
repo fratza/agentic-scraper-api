@@ -67,7 +67,9 @@ export class PreviewController {
               data: {
                 status: "error",
                 message: proceedError.message,
-                details: proceedError.response.data,
+                // Extract only the necessary information from the response data
+                // to avoid duplication of error messages
+                details: proceedError.response.data.responseData || proceedError.response.data
               },
             };
           } else {
