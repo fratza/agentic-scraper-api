@@ -18,9 +18,12 @@ export class ProceedScrapeController {
       // Use resume_link from request or fall back to stored URL
       const resume_link = req.body.resume_link || resumeUrlService.getResumeUrl();
       
+      // Extract fieldMappings from request body if available
+      const fieldMappings = req.body.fieldMappings || null;
+      
       // Log the received request and resolved values
       console.log('Proceed-scrape received request:', req.body);
-      console.log('Resolved values:', { action, resume_link, storedUrl: resumeUrlService.getResumeUrl() });
+      console.log('Resolved values:', { action, resume_link, fieldMappings, storedUrl: resumeUrlService.getResumeUrl() });
       
       // Check if we have a stored resume URL
       const storedResumeUrl = resumeUrlService.getResumeUrl();
@@ -38,12 +41,21 @@ export class ProceedScrapeController {
       
       // If we're here, we have both an action and a resume URL
 
-      // 3. Make a simple POST request to the resume URL with action as body
+      // 3. Make a POST request to the resume URL with action and fieldMappings (if available) as body
       console.log(`Making POST request to ${finalResumeUrl} with action:`, action);
-      console.log('Request payload:', { action });
+      
+      // Prepare the request payload
+      const payload = { action };
+      
+      // Add fieldMappings to payload if available
+      if (fieldMappings) {
+        Object.assign(payload, { fieldMappings });
+      }
+      
+      console.log('Request payload:', payload);
       
       try {
-        const response = await axios.post(finalResumeUrl, { action });
+        const response = await axios.post(finalResumeUrl, payload);
         console.log('Response received:', response.data);
         return res.status(200).json({
           status: "success",
