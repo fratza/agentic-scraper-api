@@ -12,77 +12,108 @@ export class ProceedScrapeController {
    */
   async proceedWithScrape(req: Request, res: Response) {
     try {
-      // Extract action from request body with fallback to 'process'
+      // Validate request body
+      if (!req.body) {
+        return res.status(400).json({
+          status: "error",
+          message: "Request body is required"
+        });
+      }
+
+      // Extract action from request body with validation
       const action = req.body.action || 'process';
+      if (typeof action !== 'string' || !['process', 'cancel', 'retry'].includes(action)) {
+        return res.status(400).json({
+          status: "error",
+          message: "Invalid action. Must be one of: 'process', 'cancel', 'retry'"
+        });
+      }
       
       // Use resume_link from request or fall back to stored URL
       const resume_link = req.body.resume_link || resumeUrlService.getResumeUrl();
       
-      // Extract fieldMappings from request body if available
-      const fieldMappings = req.body.fieldMappings || null;
+      // Validate resume URL format if provided
+      if (resume_link) {
+        try {
+          new URL(resume_link);
+        } catch (e) {
+          return res.status(400).json({
+            status: "error",
+            message: "Invalid resume URL format"
+          });
+        }
+      }
       
-      // Log the received request and resolved values
-      console.log('Proceed-scrape received request:', req.body);
-      console.log('Resolved values:', { action, resume_link, fieldMappings, storedUrl: resumeUrlService.getResumeUrl() });
-      
-      // Check if we have a stored resume URL
-      const storedResumeUrl = resumeUrlService.getResumeUrl();
-      
-      if (!resume_link && !storedResumeUrl) {
+      // Check if we have a resume URL to work with
+      if (!resume_link) {
         return res.status(400).json({
           status: "error",
-          message: "No resume URL available. Please provide resume_link or ensure it was stored from a previous request.",
+          message: "No resume URL available. Please provide a 'resume_link' in the request body or ensure it was stored from a previous request.",
+          code: "MISSING_RESUME_URL"
         });
       }
       
-      // Use the stored URL if no resume_link was provided
-      const finalResumeUrl = resume_link || storedResumeUrl;
-      console.log(`Using resume URL: ${finalResumeUrl}`);
+      // Store the resume URL if it was provided in the request
+      if (req.body.resume_link) {
+        resumeUrlService.setResumeUrl(resume_link);
+      }
       
-      // If we're here, we have both an action and a resume URL
-
-      // 3. Make a POST request to the resume URL with action and fieldMappings (if available) as body
-      console.log(`Making POST request to ${finalResumeUrl} with action:`, action);
+      console.log(`Proceeding with action '${action}' for URL:`, resume_link);
       
       // Prepare the request payload
-      const payload = { action };
+      const payload: any = { action };
       
-      // Add fieldMappings to payload if available
-      if (fieldMappings) {
-        Object.assign(payload, { fieldMappings });
+      // Add fieldMappings to payload if available and valid
+      if (req.body.fieldMappings && typeof req.body.fieldMappings === 'object') {
+        payload.fieldMappings = req.body.fieldMappings;
       }
       
-      console.log('Request payload:', payload);
-      
       try {
-        const response = await axios.post(finalResumeUrl, payload);
-        console.log('Response received:', response.data);
-        return res.status(200).json({
-          status: "success",
-          message: "Scrape proceeding",
-          data: response.data,
+        // Make the request to the resume URL
+        const response = await axios.post(resume_link, payload, {
+          timeout: 30000, // 30 second timeout
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          },
+          validateStatus: () => true // Don't throw on HTTP error status codes
         });
+        
+        console.log(`Received response with status ${response.status} from resume URL`);
+        
+        // Forward the response from the resume URL
+        return res.status(response.status).json({
+          status: response.status < 400 ? "success" : "error",
+          message: response.statusText || (response.status < 400 ? "Scrape proceeding" : "Scrape failed"),
+          data: response.data
+        });
+        
       } catch (requestError: any) {
-        console.error('POST request failed with error:', requestError.message);
-        if (requestError.response) {
-          console.error('Error response status:', requestError.response.status);
-          console.error('Error response data:', requestError.response.data);
-          
-          // Return the error from the upstream service
-          return res.status(requestError.response.status).json({
+        console.error('Error making request to resume URL:', requestError.message);
+        
+        // Handle different types of errors
+        if (requestError.code === 'ECONNABORTED') {
+          return res.status(504).json({
             status: "error",
-            message: `Failed to proceed with scrape: ${requestError.message}`,
-            error: requestError.message,
-            responseData: requestError.response.data,
-            originalStatus: requestError.response.status
+            message: "Request to resume URL timed out",
+            code: "RESUME_URL_TIMEOUT"
           });
         }
         
-        // If there's no response object, it's a network error
+        if (requestError.code === 'ENOTFOUND' || requestError.code === 'ECONNREFUSED') {
+          return res.status(502).json({
+            status: "error",
+            message: `Could not connect to resume URL: ${resume_link}`,
+            code: "RESUME_URL_UNREACHABLE"
+          });
+        }
+        
+        // For other errors, return a 500 with the error details
         return res.status(500).json({
           status: "error",
-          message: "Failed to connect to resume URL",
+          message: "An unexpected error occurred while processing your request",
           error: requestError.message,
+          code: "INTERNAL_SERVER_ERROR"
         });
       }
 
