@@ -79,7 +79,7 @@ export class ProceedScrapeController {
       try {
         // Make the request to the resume URL
         const response = await axios.post(resume_link, payload, {
-          timeout: 30000, // 30 second timeout
+          timeout: 1200000, // 30 second timeout
           headers: {
             "Content-Type": "application/json",
             Accept: "application/json",
