@@ -14,68 +14,21 @@ export class PreviewController {
   async previewSampleData(req: Request, res: Response) {
     try {
       // Process the received data
-      const { resume_link, action, sample, content_type } = req.body;
+      const { resume_link, sample, content_type } = req.body;
 
       // 1. Extract and store the resume URL if provided
       if (resume_link) {
         resumeUrlService.setResumeUrl(resume_link);
+        console.log(`Stored resume URL: ${resume_link}`);
       }
 
       // 2. Send Sample and content_type to SSE clients
       if (sample && typeof sample === "object") {
         // Send the sample data and content_type to SSE clients
         previewService.sendToAllClients({ sample, content_type });
+        console.log("Sent sample data to SSE clients");
       } else {
         console.warn("No valid sample data found in the request");
-      }
-
-      // 3. If resume_link is provided, proceed with scrape
-      let proceedResponse = null;
-      if (resume_link) {
-        try {
-          // Call the proceed-scrape endpoint internally
-          const proceedUrl = `${req.protocol}://${req.get(
-            "host"
-          )}/api/proceed-scrape`;
-
-          // Ensure action is always provided, default to 'process' if not specified
-          const actionToUse = action || "process";
-
-          console.log("Calling proceed-scrape with:", {
-            resume_link,
-            action: actionToUse,
-          });
-          proceedResponse = await axios.post(proceedUrl, {
-            resume_link,
-            action: actionToUse, // Ensure action is always provided
-          });
-
-          console.log("Proceeded with scrape:", proceedResponse.data);
-        } catch (proceedError: any) {
-          console.error("Error proceeding with scrape:", proceedError.message);
-
-          // Log more details about the error
-          if (proceedError.response) {
-            console.error(
-              "Error response status:",
-              proceedError.response.status
-            );
-            console.error("Error response data:", proceedError.response.data);
-
-            // Store the error response for the client
-            proceedResponse = {
-              data: {
-                status: "error",
-                message: proceedError.message,
-                details: proceedError.response.data,
-              },
-            };
-          } else {
-            console.error("No response from proceed-scrape endpoint");
-          }
-
-          // Continue execution even if proceed-scrape fails
-        }
       }
 
       return res.status(200).json({
@@ -83,8 +36,7 @@ export class PreviewController {
         message: "Sample data received successfully",
         resumeUrlStored: !!resumeUrlService.getResumeUrl(),
         sampleDataSent: !!(sample && typeof sample === "object"),
-        sseClients: previewService.getClientCount(),
-        proceedWithScrape: proceedResponse ? proceedResponse.data : null,
+        sseClients: previewService.getClientCount()
       });
     } catch (error: any) {
       console.error("Error processing preview sample data:", error.message);
