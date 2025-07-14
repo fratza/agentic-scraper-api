@@ -4,7 +4,7 @@
   "description": "Backend API for Agentic Web Scraper with n8n integration",
   "main": "dist/src/server.js",
   "scripts": {
-    "clean": "rimraf dist",
+    "clean": "rm -rf dist",
     "build": "npm run clean && tsc",
     "start": "node dist/src/server.js",
     "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
