@@ -9,7 +9,7 @@ const router = express.Router();
 router.use("/url-list", urlListRoutes);
 
 // Mount monitoring routes
-router.use("/is-monitored", monitoringRoutes);
+router.use("/submit-monitor-task", monitoringRoutes);
 
 // Mount results routes
 router.use("/getresults", resultsRoutes);

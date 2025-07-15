@@ -52,7 +52,7 @@ app.get("/", (req: Request, res: Response) => {
       scrapedData: "/api/scraped-data",
       supabase: {
         urlList: "/api/supabase/url-list",
-        isMonitored: "/api/supabase/is-monitored",
+        submitMonitorTask: "/api/supabase/submit-monitor-task",
         getResults: "/api/supabase/getresults"
       }
     },
