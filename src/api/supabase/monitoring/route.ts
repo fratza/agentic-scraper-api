@@ -8,6 +8,6 @@ const router = express.Router();
  * @desc    Update monitoring status for a record
  * @access  Public
  */
-router.post("/", monitoringController.updateMonitoring);
+router.post("/is-monitored", monitoringController.updateMonitoring);
 
 export default router;
