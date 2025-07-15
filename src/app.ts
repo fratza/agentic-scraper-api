@@ -50,6 +50,9 @@ app.get("/", (req: Request, res: Response) => {
       n8n: "/api/n8n",
       preview: "/api/preview",
       scrapedData: "/api/scraped-data",
+      supabase: {
+        urlList: "/api/supabase/url-list"
+      }
     },
   });
 });
