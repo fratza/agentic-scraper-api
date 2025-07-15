@@ -37,6 +37,26 @@ export class MonitoringService {
       throw error;
     }
   }
+
+  /**
+   * Update the run_at field in the scheduled_jobs table
+   */
+  async updateScheduledJobRunAt(run_id: string, run_at: string) {
+    try {
+      const { data, error } = await this.supabase
+        .from("scheduled_jobs")
+        .update({ run_at })
+        .eq("run_id", run_id)
+        .select();
+
+      if (error) throw error;
+
+      return data;
+    } catch (error: any) {
+      console.error("Error updating scheduled job run_at:", error.message);
+      throw error;
+    }
+  }
 }
 
 export default new MonitoringService();
