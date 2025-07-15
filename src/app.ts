@@ -51,7 +51,8 @@ app.get("/", (req: Request, res: Response) => {
       preview: "/api/preview",
       scrapedData: "/api/scraped-data",
       supabase: {
-        urlList: "/api/supabase/url-list"
+        urlList: "/api/supabase/url-list",
+        isMonitored: "/api/supabase/is-monitored"
       }
     },
   });

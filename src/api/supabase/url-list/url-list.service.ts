@@ -1,4 +1,4 @@
-import { config } from "../../config";
+import { config } from "../../../config";
 import { createClient } from "@supabase/supabase-js";
 
 /**
@@ -10,13 +10,12 @@ export class URLListService {
 
   constructor() {
     if (!config.supabase.url || !config.supabase.anonKey) {
-      throw new Error('Supabase configuration is missing. Please check your environment variables.');
+      throw new Error(
+        "Supabase configuration is missing. Please check your environment variables."
+      );
     }
 
-    this.supabase = createClient(
-      config.supabase.url,
-      config.supabase.anonKey
-    );
+    this.supabase = createClient(config.supabase.url, config.supabase.anonKey);
   }
 
   /**
@@ -25,8 +24,8 @@ export class URLListService {
   async getAllUrls(): Promise<string[]> {
     try {
       const { data, error } = await this.supabase
-        .from('raw')
-        .select('origin_url');
+        .from("raw")
+        .select("origin_url");
 
       if (error) throw error;
 
