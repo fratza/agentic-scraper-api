@@ -7,7 +7,7 @@ const router = express.Router();
 // Mount url-list routes
 router.use("/url-list", urlListRoutes);
 
-// Mount monitoring routes
-router.use("/is-monitored", monitoringRoutes);
+// Mount monitoring routes at root level
+router.use(monitoringRoutes);
 
 export default router;
