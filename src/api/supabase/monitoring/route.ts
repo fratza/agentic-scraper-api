@@ -5,9 +5,9 @@ const router = express.Router();
 
 /**
  * @route   POST /api/supabase/submit-monitor-task
- * @desc    Update monitoring status for a record
+ * @desc    Submit a new monitoring task
  * @access  Public
  */
-router.post("/", monitoringController.updateMonitoring);
+router.post("/", monitoringController.submitMonitorTask);
 
 export default router;

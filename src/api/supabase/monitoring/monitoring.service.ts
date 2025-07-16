@@ -3,8 +3,16 @@ import { createClient } from "@supabase/supabase-js";
 
 /**
  * MonitoringService
- * Service for updating monitoring status in the raw table
+ * Service for monitoring tasks and status updates
  */
+
+interface MonitorTask {
+  task_name: string;
+  url: string;
+  frequency_value: number;
+  frequency_unit: string;
+  next_run_at: string;
+}
 export class MonitoringService {
   private supabase;
 
@@ -54,6 +62,33 @@ export class MonitoringService {
       return data;
     } catch (error: any) {
       console.error("Error updating scheduled job run_at:", error.message);
+      throw error;
+    }
+  }
+
+  /**
+   * Create a new monitoring task
+   */
+  async createMonitorTask(task: MonitorTask) {
+    try {
+      const { data, error } = await this.supabase
+        .from("monitor_tasks")
+        .insert([
+          {
+            task_name: task.task_name,
+            url: task.url,
+            frequency_value: task.frequency_value,
+            frequency_unit: task.frequency_unit,
+            next_run_at: task.next_run_at
+          }
+        ])
+        .select();
+
+      if (error) throw error;
+
+      return data;
+    } catch (error: any) {
+      console.error("Error creating monitor task:", error.message);
       throw error;
     }
   }
