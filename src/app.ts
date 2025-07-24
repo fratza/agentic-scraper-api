@@ -68,6 +68,7 @@ app.get("/", (req: Request, res: Response) => {
         urlList: "/api/supabase/url-list",
         submitMonitorTask: "/api/supabase/submit-monitor-task",
         getResults: "/api/supabase/getresults",
+        scheduledTask: "/api/supabase/scheduled-task",
       },
     },
   });
