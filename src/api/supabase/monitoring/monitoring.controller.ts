@@ -52,13 +52,13 @@ export class MonitoringController {
    */
   async submitMonitorTask(req: Request, res: Response): Promise<Response> {
     try {
-      const { task_name, url, frequency } = req.body;
+      const { task_name, url, url_id, run_at, frequency } = req.body;
 
       // Validate required fields
-      if (!task_name || !url || !frequency || !frequency.value || !frequency.unit) {
+      if (!task_name || !url || !url_id || !run_at || !frequency || !frequency.value || !frequency.unit) {
         return res.status(400).json({
           status: "error",
-          message: "Invalid request body. Must include task_name, url, and frequency (with value and unit)"
+          message: "Invalid request body. Must include task_name, url, url_id, run_at, and frequency (with value and unit)"
         });
       }
 
@@ -71,35 +71,30 @@ export class MonitoringController {
         });
       }
 
-      // Compute next run time based on frequency
-      const now = new Date();
-      let nextRunAt: Date;
-
-      switch (frequency.unit) {
-        case "minutes":
-          nextRunAt = new Date(now.getTime() + frequency.value * 60 * 1000);
-          break;
-        case "hours":
-          nextRunAt = new Date(now.getTime() + frequency.value * 60 * 60 * 1000);
-          break;
-        case "days":
-          nextRunAt = new Date(now.getTime() + frequency.value * 24 * 60 * 60 * 1000);
-          break;
-        default:
-          nextRunAt = new Date(now.getTime() + frequency.value * 60 * 60 * 1000); // Default to hours
+      // Validate run_at is a valid date in the future
+      const runAtDate = new Date(run_at);
+      if (isNaN(runAtDate.getTime())) {
+        return res.status(400).json({
+          status: "error",
+          message: "Invalid run_at date format"
+        });
       }
 
-      // Insert task into database
-      const result = await monitoringService.createMonitorTask({
+      // Submit task to the database
+      // This will:
+      // 1. Set is_monitor column on table raw to true
+      // 2. Insert or update the scheduled_jobs table
+      const result = await monitoringService.submitMonitorTask({
         task_name,
         url,
-        frequency_value: frequency.value,
-        frequency_unit: frequency.unit,
-        next_run_at: nextRunAt.toISOString()
+        url_id,
+        run_at,
+        frequency
       });
 
       return res.status(201).json({
         status: "success",
+        message: "Monitoring task submitted successfully",
         data: result
       });
     } catch (error: any) {

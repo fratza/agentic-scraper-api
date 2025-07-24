@@ -1,5 +1,6 @@
 import { config } from "../../../config";
 import { createClient } from "@supabase/supabase-js";
+import { SubmitMonitorTaskRequest } from "./monitoring.types";
 
 /**
  * MonitoringService
@@ -89,6 +90,45 @@ export class MonitoringService {
       return data;
     } catch (error: any) {
       console.error("Error creating monitor task:", error.message);
+      throw error;
+    }
+  }
+
+  /**
+   * Submit a monitoring task
+   * 1. Set is_monitor column on table raw to true
+   * 2. Insert or update the scheduled_jobs table
+   */
+  async submitMonitorTask(taskData: SubmitMonitorTaskRequest) {
+    try {
+      // Step 1: Update is_monitor column in raw table to true
+      const { data: rawData, error: rawError } = await this.supabase
+        .from("raw")
+        .update({ is_monitor: true })
+        .eq("id", taskData.url_id)
+        .select();
+
+      if (rawError) throw rawError;
+
+      // Step 2: Insert or update the scheduled_jobs table
+      const { data: jobData, error: jobError } = await this.supabase
+        .from("scheduled_jobs")
+        .upsert({
+          id: taskData.url_id,
+          task_name: taskData.task_name,
+          frequency: taskData.frequency,
+          run_at: taskData.run_at
+        }, { onConflict: 'id' })
+        .select();
+
+      if (jobError) throw jobError;
+
+      return {
+        raw: rawData,
+        scheduledJob: jobData
+      };
+    } catch (error: any) {
+      console.error("Error submitting monitor task:", error.message);
       throw error;
     }
   }
