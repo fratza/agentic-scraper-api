@@ -1,5 +1,6 @@
 import { config } from "../../../config";
 import { createClient } from "@supabase/supabase-js";
+import { UrlItem } from "./url-list.types";
 
 /**
  * URLListService
@@ -19,18 +20,21 @@ export class URLListService {
   }
 
   /**
-   * Get all origin URLs from the raw table
+   * Get all origin URLs from the raw table with their IDs
    */
-  async getAllUrls(): Promise<string[]> {
+  async getAllUrls(): Promise<UrlItem[]> {
     try {
       const { data, error } = await this.supabase
         .from("raw")
-        .select("origin_url");
+        .select("id, origin_url");
 
       if (error) throw error;
 
-      // Extract just the origin_url values
-      return data?.map((item: { origin_url: string }) => item.origin_url) || [];
+      // Extract id and origin_url values
+      return data?.map((item: { id: number; origin_url: string }) => ({
+        id: item.id,
+        url: item.origin_url
+      })) || [];
     } catch (error: any) {
       console.error("Error fetching URLs:", error.message);
       throw error;
