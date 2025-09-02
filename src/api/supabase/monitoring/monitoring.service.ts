@@ -106,7 +106,8 @@ export class MonitoringService {
         .from("raw")
         .update({ is_monitored: true })
         .eq("url_id", taskData.urlId)
-        .select();
+        .select()
+        .single();
 
       if (rawError) throw rawError;
 
