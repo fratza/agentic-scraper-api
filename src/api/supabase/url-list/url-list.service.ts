@@ -12,7 +12,7 @@ export class URLListService {
   constructor() {
     if (!config.supabase.url || !config.supabase.anonKey) {
       throw new Error(
-        "Supabase configuration is missing. Please check your environment variables."
+        "Supabase configuration is missing. Please check your environment variables.",
       );
     }
 
@@ -26,15 +26,20 @@ export class URLListService {
     try {
       const { data, error } = await this.supabase
         .from("raw")
-        .select("id, origin_url");
+        .select("url_id, origin_url, name");
 
       if (error) throw error;
 
       // Extract id and origin_url values
-      return data?.map((item: { id: number; origin_url: string }) => ({
-        id: item.id,
-        url: item.origin_url
-      })) || [];
+      return (
+        data?.map(
+          (item: { url_id: number; origin_url: string; name: string }) => ({
+            id: item.url_id,
+            url: item.origin_url,
+            name: item.name,
+          }),
+        ) || []
+      );
     } catch (error: any) {
       console.error("Error fetching URLs:", error.message);
       throw error;

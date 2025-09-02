@@ -1,10 +1,10 @@
-import { Request, Response } from 'express';
+import { Request, Response } from "express";
 
 export interface ScheduledTaskItem {
-  task_name: string;
+  taskName: string;
   frequency: string;
-  run_at: string;
-  last_run_at: string;
+  runAt: string;
+  lastRunAt: string;
   origin_url: string;
 }
 

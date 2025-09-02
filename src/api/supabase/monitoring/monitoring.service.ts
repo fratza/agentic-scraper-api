@@ -8,11 +8,11 @@ import { SubmitMonitorTaskRequest } from "./monitoring.types";
  */
 
 interface MonitorTask {
-  task_name: string;
+  taskName: string;
   url: string;
   frequency_value: number;
   frequency_unit: string;
-  next_run_at: string;
+  next_runAt: string;
 }
 export class MonitoringService {
   private supabase;
@@ -20,7 +20,7 @@ export class MonitoringService {
   constructor() {
     if (!config.supabase.url || !config.supabase.anonKey) {
       throw new Error(
-        "Supabase configuration is missing. Please check your environment variables."
+        "Supabase configuration is missing. Please check your environment variables.",
       );
     }
 
@@ -48,14 +48,14 @@ export class MonitoringService {
   }
 
   /**
-   * Update the run_at field in the scheduled_jobs table
+   * Update the runAt field in the scheduled_jobs table
    */
-  async updateScheduledJobRunAt(run_id: string, run_at: string) {
+  async updateScheduledJobRunAt(runId: string, runAt: string) {
     try {
       const { data, error } = await this.supabase
         .from("scheduled_jobs")
-        .update({ run_at })
-        .eq("run_id", run_id)
+        .update({ run_at: runAt })
+        .eq("runId", runId)
         .select();
 
       if (error) throw error;
@@ -76,12 +76,12 @@ export class MonitoringService {
         .from("monitor_tasks")
         .insert([
           {
-            task_name: task.task_name,
+            taskName: task.taskName,
             url: task.url,
             frequency_value: task.frequency_value,
             frequency_unit: task.frequency_unit,
-            next_run_at: task.next_run_at
-          }
+            next_runAt: task.next_runAt,
+          },
         ])
         .select();
 
@@ -101,11 +101,11 @@ export class MonitoringService {
    */
   async submitMonitorTask(taskData: SubmitMonitorTaskRequest) {
     try {
-      // Step 1: Update is_monitor column in raw table to true
+      // Step 1: Update is_monitored column in raw table to true
       const { data: rawData, error: rawError } = await this.supabase
         .from("raw")
-        .update({ is_monitor: true })
-        .eq("id", taskData.url_id)
+        .update({ is_monitored: true })
+        .eq("url_id", taskData.urlId)
         .select();
 
       if (rawError) throw rawError;
@@ -113,19 +113,24 @@ export class MonitoringService {
       // Step 2: Insert or update the scheduled_jobs table
       const { data: jobData, error: jobError } = await this.supabase
         .from("scheduled_jobs")
-        .upsert({
-          id: taskData.url_id,
-          task_name: taskData.task_name,
-          frequency: taskData.frequency,
-          run_at: taskData.run_at
-        }, { onConflict: 'id' })
+        .upsert(
+          {
+            id: taskData.urlId,
+            task_name: taskData.taskName,
+            frequency: `${taskData.frequency.value} ${taskData.frequency.unit}`,
+            run_at: taskData.runAt,
+            last_run_at: null,
+            status: "active",
+          },
+          { onConflict: "id" },
+        )
         .select();
 
       if (jobError) throw jobError;
 
       return {
         raw: rawData,
-        scheduledJob: jobData
+        scheduledJob: jobData,
       };
     } catch (error: any) {
       console.error("Error submitting monitor task:", error.message);

@@ -11,6 +11,12 @@ const isN8nEnabled = () => {
   );
 };
 
+if (process.env.NODE_ENV === "development") {
+  const envPath = path.resolve(process.cwd(), ".env.local");
+  dotenv.config({ path: envPath });
+  console.log(`Loaded local environment from ${envPath}`);
+}
+
 export const config = {
   server: {
     port: process.env.PORT || 3000,

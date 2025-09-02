@@ -12,7 +12,7 @@ export class ScheduledTaskService {
   constructor() {
     if (!config.supabase.url || !config.supabase.anonKey) {
       throw new Error(
-        "Supabase configuration is missing. Please check your environment variables."
+        "Supabase configuration is missing. Please check your environment variables.",
       );
     }
 
@@ -21,31 +21,32 @@ export class ScheduledTaskService {
 
   /**
    * Get all scheduled tasks with related URL information
-   * Fetches task_name, frequency, run_at, last_run_at from scheduled_jobs table
+   * Fetches taskName, frequency, runAt, last_runAt from scheduled_jobs table
    * and origin_url from raw table using the task_id foreign key
    */
   async getAllScheduledTasks(): Promise<ScheduledTaskItem[]> {
     try {
-      const { data, error } = await this.supabase
-        .from("scheduled_jobs")
+      const { data, error } = await this.supabase.from("scheduled_jobs")
         .select(`
           task_name,
           frequency,
           run_at,
-          last_run_at,
+          last_runAt,
           raw:task_id (origin_url)
         `);
 
       if (error) throw error;
 
       // Transform the data to match the expected format
-      return data?.map((item: any) => ({
-        task_name: item.task_name,
-        frequency: item.frequency,
-        run_at: item.run_at,
-        last_run_at: item.last_run_at,
-        origin_url: item.raw?.origin_url || ''
-      })) || [];
+      return (
+        data?.map((item: any) => ({
+          taskName: item.taskName,
+          frequency: item.frequency,
+          runAt: item.runAt,
+          lastRunAt: item.lastRunAt,
+          origin_url: item.raw?.origin_url || "",
+        })) || []
+      );
     } catch (error: any) {
       console.error("Error fetching scheduled tasks:", error.message);
       throw error;

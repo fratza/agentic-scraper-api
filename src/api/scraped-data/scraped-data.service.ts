@@ -15,7 +15,7 @@ interface ScrapedDataItem {
 
 interface SSEClient {
   response: Response;
-  run_id?: string;
+  runId?: string;
 }
 
 export class ScrapedDataService {
@@ -29,7 +29,7 @@ export class ScrapedDataService {
     const newItem: ScrapedDataItem = {
       data: data,
       timestamp: data.timestamp,
-      runId: data.run_id,
+      runId: data.runId,
       isMonitor: data.isMonitor,
     };
 
@@ -73,11 +73,11 @@ export class ScrapedDataService {
    * @param req Express request object (optional)
    */
   addClient(response: Response, req?: Request): void {
-    // Extract run_id from query parameters
-    let run_id: string | undefined;
+    // Extract runId from query parameters
+    let runId: string | undefined;
     if (req && req.query) {
       // Support multiple parameter names for backward compatibility
-      run_id = (req.query.run_id || req.query.runId) as string;
+      runId = (req.query.runId || req.query.runId) as string;
     }
 
     // Set headers for SSE with CORS support for all origins
@@ -97,10 +97,10 @@ export class ScrapedDataService {
     const connectEvent = JSON.stringify({
       type: "connection",
       message: "Connected to scraped-data SSE stream",
-      run_id: run_id || "all",
+      runId: runId || "all",
     });
     response.write(
-      `event: connect\nid: ${Date.now()}\ndata: ${connectEvent}\n\n`
+      `event: connect\nid: ${Date.now()}\ndata: ${connectEvent}\n\n`,
     );
 
     // Keep connection alive with heartbeat
@@ -112,11 +112,11 @@ export class ScrapedDataService {
       response.write(`:heartbeat\n\n`);
     }, 30000); // Send heartbeat every 30 seconds
 
-    // Add client to the list with run_id if available
-    const client = { response, run_id };
+    // Add client to the list with runId if available
+    const client = { response, runId };
     this.clients.push(client);
 
-    // Client connected with optional run_id filter
+    // Client connected with optional runId filter
 
     // Handle client disconnect
     response.on("close", () => {
@@ -142,28 +142,28 @@ export class ScrapedDataService {
     // Format the data to be more directly usable by clients
     const eventData = JSON.stringify({
       timestamp: new Date().toISOString(),
-      run_id: data.runId,
+      runId: data.runId,
       data: data.data, // Send the actual scraped data content
       timestamp_received: data.timestamp,
     });
 
     const eventId = Date.now().toString();
     let clientCount = 0;
-    const run_id = data.runId;
+    const runId = data.runId;
 
     this.clients.forEach((client) => {
       const response = client.response;
 
-      // Only send to clients with matching run_id or clients subscribed to all events
+      // Only send to clients with matching runId or clients subscribed to all events
       if (
         !response.writableEnded &&
-        (run_id === undefined ||
-          client.run_id === undefined ||
-          client.run_id === run_id)
+        (runId === undefined ||
+          client.runId === undefined ||
+          client.runId === runId)
       ) {
         // Format properly with event type, id and data
         response.write(
-          `event: scrapedData\nid: ${eventId}\ndata: ${eventData}\n\n`
+          `event: scrapedData\nid: ${eventId}\ndata: ${eventData}\n\n`,
         );
         clientCount++;
       } else if (response.writableEnded) {
@@ -183,11 +183,11 @@ export class ScrapedDataService {
   }
 
   /**
-   * Get client count for a specific run_id
-   * @param run_id The run_id to count clients for
+   * Get client count for a specific runId
+   * @param runId The runId to count clients for
    */
-  getClientCountForRunId(run_id: string): number {
-    return this.clients.filter((client) => client.run_id === run_id).length;
+  getClientCountForRunId(runId: string): number {
+    return this.clients.filter((client) => client.runId === runId).length;
   }
 }
 

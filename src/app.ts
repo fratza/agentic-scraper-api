@@ -34,11 +34,11 @@ app.use((req: Request, res: Response, next: NextFunction) => {
   res.header("Access-Control-Allow-Origin", "*");
   res.header(
     "Access-Control-Allow-Methods",
-    "GET, POST, PUT, DELETE, OPTIONS, PATCH"
+    "GET, POST, PUT, DELETE, OPTIONS, PATCH",
   );
   res.header(
     "Access-Control-Allow-Headers",
-    "Origin, X-Requested-With, Content-Type, Accept, Authorization, X-Update-Operation, If-Match"
+    "Origin, X-Requested-With, Content-Type, Accept, Authorization, X-Update-Operation, If-Match",
   );
 
   // Handle OPTIONS method
@@ -60,15 +60,15 @@ app.get("/", (req: Request, res: Response) => {
     message: "Agentic Scraper API",
     status: "running",
     endpoints: {
-      scrape: "/api/scrape",
-      n8n: "/api/n8n",
-      preview: "/api/preview",
-      scrapedData: "/api/scraped-data",
+      scrape: "/scrape",
+      n8n: "/n8n",
+      preview: "/preview",
+      scrapedData: "/scraped-data",
       supabase: {
-        urlList: "/api/supabase/url-list",
-        submitMonitorTask: "/api/supabase/submit-monitor-task",
-        getResults: "/api/supabase/getresults",
-        scheduledTask: "/api/supabase/scheduled-task",
+        urlList: "/supabase/url-list",
+        submitMonitorTask: "/supabase/submit-monitor-task",
+        getResults: "/supabase/getresults",
+        scheduledTask: "/supabase/scheduled-task",
       },
     },
   });

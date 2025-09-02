@@ -13,12 +13,12 @@ export class ScrapedDataController {
     try {
       // Process the received data
 
-      // Extract run_id from request body or query parameters
-      const run_id = req.body.run_id;
+      // Extract runId from request body or query parameters
+      const runId = req.body.runId;
 
-      // If run_id is provided in the query but not in the body, add it to the body
-      if (run_id && !req.body.run_id && !req.body.runId) {
-        req.body.run_id = run_id;
+      // If runId is provided in the query but not in the body, add it to the body
+      if (runId && !req.body.runId && !req.body.runId) {
+        req.body.runId = runId;
       }
 
       // Store the data using the service
@@ -29,9 +29,9 @@ export class ScrapedDataController {
         status: "success",
         message: "Scraped data received successfully",
         data: req.body,
-        run_id: req.body.run_id,
-        sseClients: req.body.run_id
-          ? scrapedDataService.getClientCountForRunId(req.body.run_id)
+        runId: req.body.runId,
+        sseClients: req.body.runId
+          ? scrapedDataService.getClientCountForRunId(req.body.runId)
           : scrapedDataService.getClientCount(),
       });
     } catch (error: any) {
@@ -49,41 +49,28 @@ export class ScrapedDataController {
    */
   async getAllScrapedData(req: Request, res: Response) {
     try {
-      // Check if we should filter by run_id
-      const run_id = req.query.run_id || req.query.runId;
+      const runId = req.query.runId as string | undefined;
 
       let data = await scrapedDataService.getAllScrapedData();
 
-      // Filter by run_id if provided
-      if (run_id) {
+      if (runId) {
         data = data.filter(
-          (item) =>
-            item.runId === run_id ||
-            item.data?.run_id === run_id ||
-            item.data?.runId === run_id
+          (item) => item.runId === runId || item.data?.runId === runId,
         );
       }
 
-      // Unwrap the data by removing the outer "data" and "id" wrapper
       const unwrappedData = data.map((item) => {
-        // Preserve the run_id at the top level if it exists
-        const run_id = item.runId || item.data?.run_id || item.data?.runId;
-
-        // If item.data exists and is an object, return it directly with run_id
-        if (item.data && typeof item.data === "object") {
-          return { ...item.data, run_id };
-        }
-
-        // Otherwise return the item without the id field
-        const { runId, ...rest } = item;
-        return rest;
+        const runId = item.runId || item.data?.runId;
+        return item.data && typeof item.data === "object"
+          ? { ...item.data, runId }
+          : { ...item, runId };
       });
 
       return res.status(200).json({
         status: "success",
         message: "Scraped data retrieved successfully",
         count: unwrappedData.length,
-        run_id: run_id || undefined,
+        runId,
         data: unwrappedData,
       });
     } catch (error: any) {
@@ -114,12 +101,12 @@ export class ScrapedDataController {
       // Unwrap the data by removing the outer "data" and "id" wrapper
       let unwrappedData;
 
-      // Preserve the run_id at the top level if it exists
-      const run_id = data.runId;
+      // Preserve the runId at the top level if it exists
+      const runId = data.runId;
 
-      // If data.data exists and is an object, return it directly with run_id
+      // If data.data exists and is an object, return it directly with runId
       if (data.data && typeof data.data === "object") {
-        unwrappedData = { ...data.data, run_id };
+        unwrappedData = { ...data.data, runId };
       } else {
         // Otherwise return the data without the id field
         const { runId: itemId, ...rest } = data;
@@ -129,7 +116,7 @@ export class ScrapedDataController {
       return res.status(200).json({
         status: "success",
         message: "Scraped data retrieved successfully",
-        run_id,
+        runId,
         data: unwrappedData,
       });
     } catch (error: any) {
@@ -147,10 +134,10 @@ export class ScrapedDataController {
    */
   async subscribeToEvents(req: Request, res: Response) {
     try {
-      // Extract run_id from query parameters
-      const run_id = req.query.run_id || req.query.runId;
+      // Extract runId from query parameters
+      const runId = req.query.runId || req.query.runId;
 
-      // Client subscribing to events with optional run_id filter
+      // Client subscribing to events with optional runId filter
 
       // Set up SSE connection
       scrapedDataService.addClient(res, req);

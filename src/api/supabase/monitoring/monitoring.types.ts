@@ -1,17 +1,18 @@
-import { Request, Response } from 'express';
+import { Request, Response } from "express";
 
 export interface UpdateMonitoringRequest {
   id: string;
   is_monitored: boolean;
-  run_id?: string;
-  run_at?: string;
+  runId?: string;
+  runAt?: string;
 }
 
 export interface SubmitMonitorTaskRequest {
-  task_name: string;
+  taskName: string;
   url: string;
-  url_id: string;
-  run_at: string;
+  urlId: string;
+  runAt: string;
+  lastRunAt?: string;
   frequency: {
     value: number;
     unit: string;
