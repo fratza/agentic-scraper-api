@@ -1,18 +1,20 @@
 import { Request, Response } from "express";
-import { default as scheduledTaskService } from "./scheduled-task.service";
-import { ScheduledTaskController as ScheduledTaskControllerType } from "./scheduled-task.types";
+import { default as getScheduledTasksService } from "./get-scheduled-tasks.service";
+import { GetScheduledTasksControllerType as GetScheduledTasksControllerType } from "./get-scheduled-tasks.types";
 
 /**
- * ScheduledTaskController
+ * GetScheduledTasksController
  * Handles fetching scheduled tasks with related URL information
  */
-export class ScheduledTaskController implements ScheduledTaskControllerType {
+export class GetScheduledTasksController
+  implements GetScheduledTasksControllerType
+{
   /**
-   * Get all scheduled tasks with related URL information
+   * Get all scheduled tasks with task_name, frequency, run_at, last_run_at, status and origin_url
    */
   async getScheduledTasks(req: Request, res: Response) {
     try {
-      const tasks = await scheduledTaskService.getAllScheduledTasks();
+      const tasks = await getScheduledTasksService.getAllScheduledTasks();
       return res.status(200).json({
         status: "success",
         data: tasks,
@@ -28,4 +30,4 @@ export class ScheduledTaskController implements ScheduledTaskControllerType {
   }
 }
 
-export default new ScheduledTaskController();
+export default new GetScheduledTasksController();

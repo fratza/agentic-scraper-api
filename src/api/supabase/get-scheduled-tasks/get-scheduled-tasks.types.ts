@@ -1,17 +1,14 @@
 import { Request, Response } from "express";
 
 export interface ScheduledTaskItem {
-  taskName: string;
+  task_name: string;
   frequency: string;
-  runAt: string;
-  lastRunAt: string;
+  run_at: string;
+  last_run_at: string | null;
+  status: string;
   origin_url: string;
 }
 
-export interface ScheduledTaskController {
+export interface GetScheduledTasksControllerType {
   getScheduledTasks(req: Request, res: Response): Promise<Response>;
-}
-
-export interface ScheduledTaskService {
-  getAllScheduledTasks(): Promise<ScheduledTaskItem[]>;
 }

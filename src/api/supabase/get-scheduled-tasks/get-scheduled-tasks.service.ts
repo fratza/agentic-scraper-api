@@ -1,12 +1,12 @@
 import { config } from "../../../config";
 import { createClient } from "@supabase/supabase-js";
-import { ScheduledTaskItem } from "./scheduled-task.types";
+import { ScheduledTaskItem } from "./get-scheduled-tasks.types";
 
 /**
- * ScheduledTaskService
+ * GetScheduledTasksService
  * Service for fetching scheduled tasks with related URL information
  */
-export class ScheduledTaskService {
+export class GetScheduledTasksService {
   private supabase;
 
   constructor() {
@@ -20,9 +20,7 @@ export class ScheduledTaskService {
   }
 
   /**
-   * Get all scheduled tasks with related URL information
-   * Fetches taskName, frequency, runAt, last_runAt from scheduled_jobs table
-   * and origin_url from raw table using the task_id foreign key
+   * Get all scheduled tasks with task_name, frequency, run_at, last_run_at, status and origin_url
    */
   async getAllScheduledTasks(): Promise<ScheduledTaskItem[]> {
     try {
@@ -31,8 +29,9 @@ export class ScheduledTaskService {
           task_name,
           frequency,
           run_at,
-          last_runAt,
-          raw:task_id (origin_url)
+          last_run_at,
+          status,
+          raw!id (origin_url)
         `);
 
       if (error) throw error;
@@ -40,10 +39,11 @@ export class ScheduledTaskService {
       // Transform the data to match the expected format
       return (
         data?.map((item: any) => ({
-          taskName: item.taskName,
+          task_name: item.task_name,
           frequency: item.frequency,
-          runAt: item.runAt,
-          lastRunAt: item.lastRunAt,
+          run_at: item.run_at,
+          last_run_at: item.last_run_at,
+          status: item.status,
           origin_url: item.raw?.origin_url || "",
         })) || []
       );
@@ -54,5 +54,5 @@ export class ScheduledTaskService {
   }
 }
 
-const service = new ScheduledTaskService();
+const service = new GetScheduledTasksService();
 export default service;
