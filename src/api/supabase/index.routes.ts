@@ -3,6 +3,7 @@ import urlListRoutes from "./url-list/route";
 import monitoringRoutes from "./monitoring/route";
 import resultsRoutes from "./results/route";
 import getScheduledTasksRoutes from "./get-scheduled-tasks/route";
+import getExtractedDataRoutes from "./get-extracted-data/route";
 
 const router = express.Router();
 
@@ -17,5 +18,8 @@ router.use("/getresults", resultsRoutes);
 
 // Mount get scheduled tasks routes
 router.use("/get-scheduled-tasks", getScheduledTasksRoutes);
+
+// Mount get extracted data routes
+router.use("/get-extracted-data", getExtractedDataRoutes);
 
 export default router;
