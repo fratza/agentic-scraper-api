@@ -37,7 +37,13 @@ export class GetExtractedDataService {
         throw error;
       }
 
-      return data;
+      // Return only the data content, excluding any id/uuid fields
+      const extractedData = data.data;
+      if (typeof extractedData === "object" && extractedData !== null) {
+        const { id, uuid, _id, ...cleanData } = extractedData;
+        return { data: cleanData };
+      }
+      return { data: extractedData };
     } catch (error: any) {
       console.error("Error fetching extracted data:", error.message);
       throw error;

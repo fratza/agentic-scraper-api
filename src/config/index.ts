@@ -19,7 +19,7 @@ if (process.env.NODE_ENV === "development") {
 
 export const config = {
   server: {
-    port: process.env.PORT || 3000,
+    port: process.env.PORT || 8080,
   },
   n8n: {
     enabled: isN8nEnabled(),
